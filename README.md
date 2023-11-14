@@ -8,9 +8,9 @@ TA Data Kit is a Python library developed by [TA Instruments](https://www.tainst
 
 ## Features
 
-**Data Parsing**: Efficiently parse data from various file formats.
-**Data Visualization**: Create insightful visualizations to understand complex data sets.
-**Data Analysis**: Advanced analytical tools tailored for materials characterization.
+* **Data Parsing**: Efficiently parse data from various file formats.
+* **Data Visualization**: Create insightful visualizations to understand complex data sets.
+* **Data Analysis**: Advanced analytical tools tailored for materials characterization.
 
 ## Quick Start
 
