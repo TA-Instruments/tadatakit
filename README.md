@@ -14,7 +14,16 @@ TA Data Kit is a Python library developed by [TA Instruments](https://www.tainst
 
 ## Quick Start
 
-...
+### Classes
+
+Importing the `Experiment` class dynamically generates classes for the entire data schema.
+
+Try running the following in a REPL (iPython or Jupyter Notebook):
+
+```python
+from tadatakit.class_generator import Experiment
+Experiment?
+```
 
 ## Documentation
 
