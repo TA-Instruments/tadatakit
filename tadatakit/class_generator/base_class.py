@@ -1,6 +1,10 @@
 import inspect
+import json
+import datetime
 from functools import wraps
-from typing import Any, Type, Union, get_origin, get_args
+from typing import Any, Type, Union, get_origin, get_args, Optional, List
+
+from .common_utils import snake_to_pascal
 
 
 class SchemaObject:
@@ -79,10 +83,20 @@ class SchemaObject:
             for name, value in bound_args.arguments.items():
                 if name != "self":
                     expected_type = cls._type_hints[name]
-                    if not is_instance(value, expected_type) and value is not None:
-                        raise TypeError(
-                            f"Argument '{name}' must be of type {expected_type}"
-                        )
+                    if value is not None and not is_instance(value, expected_type):
+                        try:
+                            class_for_casting = get_class_from_type_hint(expected_type)
+                            if class_for_casting is datetime.datetime:
+                                value = datetime.datetime.strptime(
+                                    value, "%Y-%m-%dT%H:%M:%S.%fZ"
+                                )
+                            else:
+                                value = class_for_casting(value)
+                        except (ValueError, TypeError) as e:
+                            print(get_class_from_type_hint(expected_type))
+                            raise TypeError(
+                                f"Argument '{name}' must be of type {expected_type} (value:{value}, type:{type(value)})"
+                            ) from e
                     setattr(self, name, value)
 
         cls.__init__ = new_init
@@ -117,10 +131,95 @@ class SchemaObject:
         """
         pass
 
+    @classmethod
+    def from_json(cls, path_to_json: str):
+        """
+        Initialize an instance of the class from a JSON file or string that conforms to the schema.
+
+        Args:
+            path_to_json (str): Path to the JSON input file.
+
+        Returns:
+            SchemaObject: An instance of the class initialized with data from the JSON input.
+        """
+        with open(path_to_json, "r") as file:
+            data = json.load(file)
+
+        return cls._from_dict(data)
+
+    @classmethod
+    def _from_dict(cls, data_dict: dict, path: str = "") -> "SchemaObject":
+        """
+        Recursive helper method to instantiate objects from a dictionary.
+
+        Args:
+            data_dict (dict): The dictionary containing data to instantiate the object.
+            path (str): A string representing the current path in the object hierarchy.
+
+        Returns:
+            SchemaObject: An instance of the class initialized with data from the dictionary.
+
+        Raises:
+            TypeError: If a required argument is missing or if there is a type mismatch.
+        """
+        kwargs = {}
+        for prop_name, type_hint in cls._type_hints.items():
+            pascal_case_name = snake_to_pascal(prop_name)
+            current_path = f"{path}.{pascal_case_name}" if path else pascal_case_name
+
+            if pascal_case_name in data_dict:
+                value = data_dict[pascal_case_name]
+                try:
+                    if is_optional_list_of_schema_objects(type_hint):
+                        list_type = get_args(get_args(type_hint)[0])[0]
+                        if value is not None:
+                            kwargs[prop_name] = [
+                                list_type._from_dict(item, f"{current_path}[{index}]")
+                                for index, item in enumerate(value)
+                            ]
+                    elif inspect.isclass(type_hint) and issubclass(
+                        type_hint, SchemaObject
+                    ):
+                        kwargs[prop_name] = type_hint._from_dict(value, current_path)
+                    elif is_optional_type(type_hint) and issubclass(
+                        get_args(type_hint)[0], SchemaObject
+                    ):
+                        if value is not None:
+                            kwargs[prop_name] = get_args(type_hint)[0]._from_dict(
+                                value, current_path
+                            )
+                    elif get_origin(type_hint) is list and issubclass(
+                        get_args(type_hint)[0], SchemaObject
+                    ):
+                        kwargs[prop_name] = [
+                            get_args(type_hint)[0]._from_dict(
+                                item, f"{current_path}[{index}]"
+                            )
+                            for index, item in enumerate(value)
+                        ]
+                    else:
+                        # print(prop_name, type_hint)
+                        kwargs[prop_name] = value
+                except (TypeError, AttributeError) as e:
+                    raise TypeError(f"Error at {current_path}: {str(e)}") from e
+            else:
+                # Check if the property is optional
+                if not is_optional_type(type_hint):
+                    raise TypeError(
+                        f"Missing required argument at {current_path} (type_hint:{type_hint})"
+                    )
+
+        try:
+            return cls(**kwargs)
+        except TypeError as e:
+            raise TypeError(
+                f"Error at {path} (while constructing {cls.__name__}): {str(e)}"
+            ) from e
+
 
 def is_instance(obj: Any, type_hint: Type) -> bool:
     """
-    Custom type check that understands typing module constructs.
+    Custom type check that understands typing module constructs, such as Union and List.
 
     Args:
         obj (Any): The object to check.
@@ -128,12 +227,69 @@ def is_instance(obj: Any, type_hint: Type) -> bool:
 
     Returns:
         bool: True if obj is an instance of type_hint, False otherwise.
+
+    Raises:
+        TypeError: If there is an issue with the type hint or the object during type checking.
+    """
+    try:
+        if get_origin(type_hint) is Union:
+            return any(is_instance(obj, arg) for arg in get_args(type_hint))
+        elif get_origin(type_hint) is list and isinstance(obj, list):
+            element_type = get_args(type_hint)[0]
+            return all(isinstance(elem, element_type) for elem in obj)
+        elif isinstance(obj, type_hint):
+            return True
+        return False
+    except TypeError as e:
+        raise TypeError(f"type_hint: {type_hint}, obj: {obj}") from e
+
+
+def is_optional_list_of_schema_objects(type_hint: Type) -> bool:
+    """
+    Check if the type hint represents an optional list of SchemaObject subclasses.
+
+    Args:
+        type_hint (Type): The type hint to check.
+
+    Returns:
+        bool: True if the type hint is an optional list of SchemaObject subclasses, False otherwise.
     """
     if get_origin(type_hint) is Union:
-        return any(is_instance(obj, arg) for arg in get_args(type_hint))
-    elif isinstance(obj, type_hint):
-        return True
-    elif get_origin(type_hint) is list and isinstance(obj, list):
-        element_type = get_args(type_hint)[0]
-        return all(isinstance(elem, element_type) for elem in obj)
+        args = get_args(type_hint)
+        return any(arg is type(None) for arg in args) and any(
+            get_origin(arg) is list and issubclass(get_args(arg)[0], SchemaObject)
+            for arg in args
+        )
     return False
+
+
+def is_optional_type(type_hint: Type) -> bool:
+    """
+    Check if the type hint is Optional or a Union with None.
+
+    Args:
+        type_hint (Type): The type hint to check.
+
+    Returns:
+        bool: True if the type hint is Optional or a Union including None, False otherwise.
+    """
+    if get_origin(type_hint) is Union:
+        return any(arg is type(None) for arg in get_args(type_hint))
+    return False
+
+
+def get_class_from_type_hint(type_hint: Type) -> Type:
+    """
+    Extract the actual class from a type hint, handling Optional and List types.
+
+    Args:
+        type_hint (Type): The type hint from which to extract the class.
+
+    Returns:
+        Type: The extracted class from the type hint.
+    """
+    if is_optional_type(type_hint):
+        type_hint = get_args(type_hint)[0]
+    if get_origin(type_hint) is list:
+        type_hint = get_args(type_hint)[0]
+    return type_hint

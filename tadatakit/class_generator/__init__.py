@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from .factory import class_registry_factory
-from .utils import load_schema, register_classes_in_globals
+from .factory_utils import load_schema, register_classes_in_globals
 
 
 schema_file_path = Path(__file__).parent.parent.parent / "schema" / "TADataSchema.json"

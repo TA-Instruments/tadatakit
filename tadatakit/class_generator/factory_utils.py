@@ -1,8 +1,7 @@
-import re
 import json
 import datetime
 import uuid
-from typing import Dict, Tuple, List, Type, Optional
+from typing import Dict, Tuple, List, Type, Optional, Union, get_origin, get_args
 
 from .base_class import SchemaObject
 
@@ -56,20 +55,6 @@ def get_ref(schema: Dict, ref_str: str) -> Dict:
     for key in json_path:
         level = level[key]
     return level
-
-
-def camel_to_snake(name: str) -> str:
-    """
-    Convert a camelCase string to a snake_case string.
-
-    Args:
-        name (str): The camelCase string to convert.
-
-    Returns:
-        str: The converted snake_case string.
-    """
-    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
 def get_ref_path(schema: Dict, ref_path: str) -> Dict:

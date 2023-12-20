@@ -2,14 +2,14 @@ import json
 from typing import Dict, Any, Type
 
 from .base_class import SchemaObject
-from .utils import (
+from .factory_utils import (
     find_refs,
     get_ref,
     type_hint_generator,
     split_props_by_required,
-    camel_to_snake,
     identify_class_of_ref,
 )
+from .common_utils import pascal_to_snake
 
 
 def initialize_class_registry(
@@ -135,11 +135,16 @@ def _add_property_to_class(
         is_optional (bool): Indicates whether the property is optional.
         class_registry (Dict[str, Dict[str, Any]]): The class registry.
     """
-    snake_case_name = camel_to_snake(prop_name)
+    snake_case_name = pascal_to_snake(prop_name)
     type_hint = type_hint_generator(prop, is_optional, class_registry)
-    class_obj.add_property(
-        snake_case_name, type_hint, description=None
-    )  # TODO: Replace with actual description if available
+    if is_optional:
+        class_obj.add_property(
+            snake_case_name, type_hint, description=None, default=None
+        )  # TODO: Replace with actual description if available
+    else:
+        class_obj.add_property(
+            snake_case_name, type_hint, description=None
+        )  # TODO: Replace with actual description if available
 
 
 def class_registry_factory(schema: Dict, start_ref: str) -> Dict[str, Dict[str, Any]]:
