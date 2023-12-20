@@ -21,20 +21,32 @@ Importing the `Experiment` class dynamically generates classes for the entire da
 Try running the following in a REPL (iPython or Jupyter Notebook):
 
 ```python
-from tadatakit.class_generator import Experiment
+from tadatakit.classes import Experiment
 
 Experiment?
 ```
 
-### Parsing
+### File Parsing
 
 A file can be parsed using the `from_json` method on the `Experiment` class, as below.
 
 ```python
-from tadatakit.class_generator import Experiment
+from tadatakit.classes import Experiment
 
 experiment = Experiment.from_json("<path/to/json_file.json>")
 ```
+
+### Using The Data
+
+A convenience function is implemented to provide a pandas DataFrame at `Experiment.dataframe`. The below example shows the parsing of a file and the use of that dataframe.
+
+```python
+from tadatakit.classes import Experiment
+
+experiment = Experiment.from_json("<path/to/json_file.json>")
+experiment.dataframe.head()
+```
+
 
 ## Documentation
 
