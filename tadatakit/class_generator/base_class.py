@@ -2,9 +2,9 @@ import inspect
 import json
 import datetime
 from functools import wraps
-from typing import Any, Type, Union, get_origin, get_args, Optional, List
+from typing import Any, Type, Union, get_origin, get_args, Optional, List, Dict
 
-from .common_utils import snake_to_pascal
+from .common_utils import json_serializer, snake_to_pascal
 
 
 class SchemaObject:
@@ -145,10 +145,10 @@ class SchemaObject:
         with open(path_to_json, "r") as file:
             data = json.load(file)
 
-        return cls._from_dict(data)
+        return cls.from_dict(data)
 
     @classmethod
-    def _from_dict(cls, data_dict: dict, path: str = "") -> "SchemaObject":
+    def from_dict(cls, data_dict: dict, path: str = "") -> "SchemaObject":
         """
         Recursive helper method to instantiate objects from a dictionary.
 
@@ -180,7 +180,7 @@ class SchemaObject:
                     elif inspect.isclass(type_hint) and issubclass(
                         type_hint, SchemaObject
                     ):
-                        kwargs[prop_name] = type_hint._from_dict(value, current_path)
+                        kwargs[prop_name] = type_hint.from_dict(value, current_path)
                     elif is_optional_type(type_hint) and issubclass(
                         get_args(type_hint)[0], SchemaObject
                     ):
@@ -215,6 +215,42 @@ class SchemaObject:
             raise TypeError(
                 f"Error at {path} (while constructing {cls.__name__}): {str(e)}"
             ) from e
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the SchemaObject instance to a dictionary representation compatible with the OpenAPI schema.
+
+        This method recursively converts all properties of the SchemaObject, including nested SchemaObject instances,
+        into a dictionary format.
+
+        Returns:
+            Dict[str, Any]: A dictionary representation of the SchemaObject instance.
+        """
+        result = {}
+        for prop_name, _ in self._type_hints.items():
+            value = getattr(self, prop_name, None)
+            if isinstance(value, SchemaObject):
+                result[snake_to_pascal(prop_name)] = value.to_dict()
+            elif (
+                isinstance(value, list) and value and isinstance(value[0], SchemaObject)
+            ):
+                result[snake_to_pascal(prop_name)] = [item.as_dict() for item in value]
+            else:
+                result[snake_to_pascal(prop_name)] = value
+        return result
+
+    def to_json(self, path_to_json: str) -> None:
+        """
+        Write the SchemaObject instance to a JSON file.
+
+        This method saves the dictionary representation of the SchemaObject instance
+        to a specified JSON file.
+
+        Args:
+            path_to_json (str): The file path where the JSON should be saved.
+        """
+        with open(path_to_json, "w") as file:
+            json.dump(self.to_dict(), file, indent=4, default=json_serializer)
 
 
 def is_instance(obj: Any, type_hint: Type) -> bool:

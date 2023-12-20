@@ -1,4 +1,5 @@
 import re
+import datetime
 
 
 def pascal_to_snake(name: str) -> str:
@@ -26,3 +27,11 @@ def snake_to_pascal(name: str) -> str:
         str: The converted PascalCase string.
     """
     return "".join(x.title() for x in name.split("_"))
+
+
+def json_serializer(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, datetime.datetime):
+        return obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    raise TypeError("Type %s not serializable" % type(obj))
