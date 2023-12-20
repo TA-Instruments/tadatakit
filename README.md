@@ -22,7 +22,18 @@ Try running the following in a REPL (iPython or Jupyter Notebook):
 
 ```python
 from tadatakit.class_generator import Experiment
+
 Experiment?
+```
+
+### Parsing
+
+A file can be parsed using the `from_json` method on the `Experiment` class, as below.
+
+```python
+from tadatakit.class_generator import Experiment
+
+experiment = Experiment.from_json("<path/to/json_file.json>")
 ```
 
 ## Documentation
