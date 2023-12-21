@@ -174,7 +174,7 @@ class SchemaObject:
                         list_type = get_args(get_args(type_hint)[0])[0]
                         if value is not None:
                             kwargs[prop_name] = [
-                                list_type._from_dict(item, f"{current_path}[{index}]")
+                                list_type.from_dict(item, f"{current_path}[{index}]")
                                 for index, item in enumerate(value)
                             ]
                     elif inspect.isclass(type_hint) and issubclass(
@@ -185,14 +185,14 @@ class SchemaObject:
                         get_args(type_hint)[0], SchemaObject
                     ):
                         if value is not None:
-                            kwargs[prop_name] = get_args(type_hint)[0]._from_dict(
+                            kwargs[prop_name] = get_args(type_hint)[0].from_dict(
                                 value, current_path
                             )
                     elif get_origin(type_hint) is list and issubclass(
                         get_args(type_hint)[0], SchemaObject
                     ):
                         kwargs[prop_name] = [
-                            get_args(type_hint)[0]._from_dict(
+                            get_args(type_hint)[0].from_dict(
                                 item, f"{current_path}[{index}]"
                             )
                             for index, item in enumerate(value)
