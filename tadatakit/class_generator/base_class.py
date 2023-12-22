@@ -234,7 +234,7 @@ class SchemaObject:
             elif (
                 isinstance(value, list) and value and isinstance(value[0], SchemaObject)
             ):
-                result[snake_to_pascal(prop_name)] = [item.as_dict() for item in value]
+                result[snake_to_pascal(prop_name)] = [item.to_dict() for item in value]
             else:
                 result[snake_to_pascal(prop_name)] = value
         return result
