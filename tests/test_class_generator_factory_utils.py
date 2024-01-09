@@ -32,33 +32,33 @@ def test_register_classes_in_globals():
 
 def test_get_ref():
     schema = load_schema(TEST_SCHEMA_FILE)
-    ref_str = "#/components/schemas/Id"
+    ref_str = "#/components/schemas/Number"
     ref = get_ref(schema, ref_str)
     assert isinstance(ref, dict)
-    assert ref.get("type") == "integer"
+    assert ref.get("type") == "number"
 
 
 def test_get_ref_path():
     schema = load_schema(TEST_SCHEMA_FILE)
-    ref_path = "components/schemas/Id"
+    ref_path = "components/schemas/Number"
     ref = get_ref_path(schema, ref_path)
     assert isinstance(ref, dict)
-    assert ref.get("type") == "integer"
+    assert ref.get("type") == "number"
 
 
 def test_find_refs():
     schema = load_schema(TEST_SCHEMA_FILE)
     refs = find_refs(schema)
     assert isinstance(refs, list)
-    assert "#/components/schemas/Id" in refs
+    assert "#/components/schemas/Number" in refs
 
 
 def test_split_props_by_required():
     schema = load_schema(TEST_SCHEMA_FILE)
-    details_schema = get_ref(schema, "#/components/schemas/Details")
+    details_schema = get_ref(schema, "#/components/schemas/Experiment")
     required_props, non_required_props = split_props_by_required(details_schema)
-    assert "description" in required_props
-    assert "count" in non_required_props
+    assert "Sample" in required_props
+    assert "FinishTime" in non_required_props
 
 
 def test_type_hint_generator():
@@ -70,7 +70,7 @@ def test_type_hint_generator():
 
 def test_identify_class_of_ref():
     schema = load_schema(TEST_SCHEMA_FILE)
-    example_object_schema = get_ref(schema, "#/components/schemas/ExampleObject")
+    example_object_schema = get_ref(schema, "#/components/schemas/Experiment")
     subclass_it, class_type = identify_class_of_ref(example_object_schema)
     assert subclass_it
     assert class_type == SchemaObject
