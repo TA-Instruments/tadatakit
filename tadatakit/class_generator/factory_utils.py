@@ -39,7 +39,7 @@ def register_classes_in_globals(globals_dict: Dict, class_registry: Dict):
         globals_dict[class_name] = class_dict["class"]
 
 
-def get_ref(schema: Dict, ref_str: str) -> Dict:
+def get_schema_object_by_ref(schema: Dict, ref_str: str) -> Dict:
     """
     Retrieve a specific part of the schema based on the JSON pointer reference.
 
@@ -57,57 +57,37 @@ def get_ref(schema: Dict, ref_str: str) -> Dict:
     return level
 
 
-def get_ref_path(schema: Dict, ref_path: str) -> Dict:
-    """
-    Navigate the schema to find a specific $ref path.
-
-    Args:
-        schema (Dict): The JSON schema to navigate.
-        ref_path (str): The path to the reference in the schema.
-
-    Returns:
-        Dict: The part of the schema referenced by ref_path.
-    """
-    parts = ref_path.strip("#/").split("/")
-    current = schema
-    for part in parts:
-        current = current.get(part, {})
-        if not current:
-            break
-    return current
-
-
-def find_refs(schema: Dict, refs: Optional[List[str]] = None) -> List[str]:
+def recursively_find_refs(
+    schema: Dict, found_refs: Optional[List[str]] = None
+) -> List[str]:
     """
     Recursively find all $ref references in a JSON schema.
 
     Args:
         schema (Dict): The JSON schema to search.
-        refs (Optional[List[str]]): The list to accumulate references.
+        found_refs (Optional[List[str]]): The list to accumulate references.
 
     Returns:
         List[str]: A list of all $ref references found in the schema.
     """
-    if refs is None:
-        refs = []
+    if found_refs is None:
+        found_refs = []
 
     if isinstance(schema, dict):
         for key, value in schema.items():
             if key == "$ref":
-                if value not in refs:
-                    refs.append(value)
-                    nested_schema = get_ref_path(schema, value)
-                    find_refs(nested_schema, refs)
+                if value not in found_refs:
+                    found_refs.append(value)
             elif key in ["allOf", "anyOf", "oneOf"]:
                 for item in value:
-                    find_refs(item, refs)
+                    recursively_find_refs(item, found_refs)
             else:
-                find_refs(value, refs)
+                recursively_find_refs(value, found_refs)
     elif isinstance(schema, list):
         for item in schema:
-            find_refs(item, refs)
+            recursively_find_refs(item, found_refs)
 
-    return refs
+    return found_refs
 
 
 def split_props_by_required(subschema: dict) -> Tuple[Dict, Dict]:
@@ -130,7 +110,7 @@ def split_props_by_required(subschema: dict) -> Tuple[Dict, Dict]:
     return required_props, non_required_props
 
 
-def type_hint_generator(
+def generate_type_hint(
     property_definition: Dict, is_optional: bool, class_registry: Dict
 ) -> Type:
     """
@@ -170,7 +150,7 @@ def type_hint_generator(
 
         if type_hint is list:
             if "items" in property_definition:
-                subitems = type_hint_generator(
+                subitems = generate_type_hint(
                     property_definition["items"], False, class_registry
                 )
                 type_hint = List[subitems]
@@ -186,7 +166,7 @@ def type_hint_generator(
         raise TypeError(f"Unsupported schema property: {property_definition}")
 
 
-def identify_class_of_ref(subschema: Dict) -> Tuple[bool, Optional[Type]]:
+def lookup_class_of_ref(subschema: Dict) -> Tuple[bool, Optional[Type]]:
     """
     Identify the class type for a given subschema reference.
 

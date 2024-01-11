@@ -1,6 +1,6 @@
 import pytest
 import inspect
-from tadatakit.class_generator.base_class import (
+from tadatakit.class_generator.schema_object import (
     SchemaObject,
     is_instance,
     is_optional_list_of_schema_objects,

@@ -3,34 +3,31 @@ from typing import Dict, Any, Type
 
 from .schema_object import SchemaObject
 from .factory_utils import (
-    find_refs,
-    get_ref,
-    type_hint_generator,
+    recursively_find_refs,
+    get_schema_object_by_ref,
+    generate_type_hint,
     split_props_by_required,
-    identify_class_of_ref,
+    lookup_class_of_ref,
 )
 from .common_utils import pascal_to_snake
 
 
-def initialize_class_registry(
-    schema: Dict, start_ref: str
-) -> Dict[str, Dict[str, Any]]:
+def initialize_class_registry(schema: Dict) -> Dict[str, Dict[str, Any]]:
     """
-    Initialize the class registry based on the schema and a starting reference.
+    Initialize the class registry based on the schema.
 
     Args:
         schema (Dict): The JSON schema.
-        start_ref (str): The starting reference point in the schema.
 
     Returns:
         Dict[str, Dict[str, Any]]: A dictionary representing the class registry.
     """
-    refs = find_refs(schema, [start_ref])
+    refs = recursively_find_refs(schema)
     class_registry = {}
     for ref in refs:
-        subschema = get_ref(schema, ref)
+        subschema = get_schema_object_by_ref(schema, ref)
         class_name = ref.rsplit("/", 1)[-1]
-        subclass_it, class_type = identify_class_of_ref(subschema)
+        subclass_it, class_type = lookup_class_of_ref(subschema)
         if class_type is not None:
             if subclass_it:
                 new_class = type(class_name, (class_type,), {})
@@ -53,7 +50,7 @@ def initialize_class_registry(
     return class_registry
 
 
-def add_type_hints(
+def add_type_hints_to_all_classes(
     class_registry: Dict[str, Dict[str, Any]]
 ) -> Dict[str, Dict[str, Any]]:
     """
@@ -67,7 +64,7 @@ def add_type_hints(
     """
     for class_name, class_dict in class_registry.items():
         if class_dict["class"] is list:
-            type_hint = type_hint_generator(
+            type_hint = generate_type_hint(
                 class_dict["subschema"],
                 is_optional=False,
                 class_registry=class_registry,
@@ -78,7 +75,7 @@ def add_type_hints(
     return class_registry
 
 
-def populate_classes(
+def populate_classes_with_properties(
     class_registry: Dict[str, Dict[str, Any]]
 ) -> Dict[str, Dict[str, Any]]:
     """
@@ -136,7 +133,7 @@ def _add_property_to_class(
         class_registry (Dict[str, Dict[str, Any]]): The class registry.
     """
     snake_case_name = pascal_to_snake(prop_name)
-    type_hint = type_hint_generator(prop, is_optional, class_registry)
+    type_hint = generate_type_hint(prop, is_optional, class_registry)
     if is_optional:
         class_obj.add_property(
             snake_case_name, type_hint, description=None, default=None
@@ -147,18 +144,17 @@ def _add_property_to_class(
         )  # TODO: Replace with actual description if available
 
 
-def class_registry_factory(schema: Dict, start_ref: str) -> Dict[str, Dict[str, Any]]:
+def generate_complete_class_registry(schema: Dict) -> Dict[str, Dict[str, Any]]:
     """
     Factory function to create a class registry from a given schema and starting reference.
 
     Args:
         schema (Dict): The JSON schema.
-        start_ref (str): The starting reference point in the schema.
 
     Returns:
         Dict[str, Dict[str, Any]]: The created class registry.
     """
-    class_registry = initialize_class_registry(schema, start_ref)
-    class_registry = add_type_hints(class_registry)
-    class_registry = populate_classes(class_registry)
+    class_registry = initialize_class_registry(schema)
+    class_registry = add_type_hints_to_all_classes(class_registry)
+    class_registry = populate_classes_with_properties(class_registry)
     return class_registry

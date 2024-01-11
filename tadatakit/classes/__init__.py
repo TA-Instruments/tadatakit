@@ -32,7 +32,7 @@ def create_dataframe(
     return df.rename(columns=column_names)
 
 
-def create_whole_dataframe(self: Experiment) -> pd.DataFrame:
+def get_dataframe(self: Experiment) -> pd.DataFrame:
     """
     Create a pandas DataFrame containing all results from the Experiment object.
 
@@ -78,10 +78,10 @@ def get_dataframes_by_step(self: Experiment) -> List[Optional[pd.DataFrame]]:
     """
     return [
         create_dataframe(self, indices[0], indices[1]) if indices is not None else None
-        for indices in self.procedure.step_indices
+        for indices in self.procedure.get_step_indices()
     ]
 
 
-setattr(Experiment, "dataframe", property(create_whole_dataframe))
-setattr(Procedure, "step_indices", property(get_step_indices))
-setattr(Experiment, "step_dataframes", property(get_dataframes_by_step))
+setattr(Experiment, "get_dataframe", get_dataframe)
+setattr(Procedure, "get_step_indices", get_step_indices)
+setattr(Experiment, "get_dataframes_by_step", get_dataframes_by_step)
