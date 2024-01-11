@@ -2,7 +2,8 @@ import inspect
 import json
 import datetime
 from functools import wraps
-from typing import Any, Type, Union, get_origin, get_args, Optional, List, Dict
+import os
+from typing import Any, Type, Union, get_origin, get_args, Optional, List, Dict, TextIO
 
 from .common_utils import json_serializer, snake_to_pascal
 
@@ -77,7 +78,7 @@ class SchemaObject:
         new_sig = inspect.Signature(parameters)
 
         @wraps(cls.__init__)
-        def new_init(self, *args, **kwargs):
+        def replacement_init_function(self, *args, **kwargs):
             bound_args = new_sig.bind(self, *args, **kwargs)
             bound_args.apply_defaults()
             for name, value in bound_args.arguments.items():
@@ -99,7 +100,7 @@ class SchemaObject:
                             ) from e
                     setattr(self, name, value)
 
-        cls.__init__ = new_init
+        cls.__init__ = replacement_init_function
         cls.__init__.__signature__ = new_sig
         cls.__init__.__doc__ = doc_string
 
@@ -132,7 +133,7 @@ class SchemaObject:
         pass
 
     @classmethod
-    def from_json(cls, path_to_json: str):
+    def from_json(cls, path_to_json: str) -> "SchemaObject":
         """
         Initialize an instance of the class from a JSON file or string that conforms to the schema.
 
@@ -218,7 +219,7 @@ class SchemaObject:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert the SchemaObject instance to a dictionary representation compatible with the OpenAPI schema.
+        Convert the SchemaObject instance to a dictionary representation compatible with the schema.
 
         This method recursively converts all properties of the SchemaObject, including nested SchemaObject instances,
         into a dictionary format.
@@ -239,18 +240,23 @@ class SchemaObject:
                 result[snake_to_pascal(prop_name)] = value
         return result
 
-    def to_json(self, path_to_json: str) -> None:
+    def to_json(self, path_or_file: [str, os.PathLike, TextIO]) -> None:
         """
         Write the SchemaObject instance to a JSON file.
 
         This method saves the dictionary representation of the SchemaObject instance
-        to a specified JSON file.
+        to a specified JSON file, file object, pathlib Path, or any object implementing os.PathLike.
 
         Args:
-            path_to_json (str): The file path where the JSON should be saved.
+            path_or_file (Union[str, os.PathLike, TextIO]): The file path where the JSON should be saved,
+                                                                   a file object to write to, or an object representing
+                                                                   a file system path
         """
-        with open(path_to_json, "w") as file:
-            json.dump(self.to_dict(), file, indent=4, default=json_serializer)
+        if isinstance(path_or_file, (str, os.PathLike)):
+            with open(path_or_file, "w") as file:
+                json.dump(self.to_dict(), file, indent=4, default=json_serializer)
+        else:
+            json.dump(self.to_dict(), path_or_file, indent=4, default=json_serializer)
 
 
 def is_instance(obj: Any, type_hint: Type) -> bool:

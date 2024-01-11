@@ -3,7 +3,7 @@ import datetime
 import uuid
 from typing import Dict, Tuple, List, Type, Optional, Union, get_origin, get_args
 
-from .base_class import SchemaObject
+from .schema_object import SchemaObject
 
 
 def load_schema(file_path: str) -> Dict:

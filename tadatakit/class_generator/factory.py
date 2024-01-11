@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Any, Type
 
-from .base_class import SchemaObject
+from .schema_object import SchemaObject
 from .factory_utils import (
     find_refs,
     get_ref,

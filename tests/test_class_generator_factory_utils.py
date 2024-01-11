@@ -10,7 +10,7 @@ from tadatakit.class_generator.factory_utils import (
     type_hint_generator,
     identify_class_of_ref,
 )
-from tadatakit.class_generator.base_class import SchemaObject
+from tadatakit.class_generator.schema_object import SchemaObject
 
 TEST_SCHEMA_FILE = Path(__file__).parent / "test_schema.json"
 
