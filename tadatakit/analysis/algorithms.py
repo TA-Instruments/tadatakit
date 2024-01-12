@@ -27,6 +27,10 @@ class LinearRegression(Algorithm):
         array([5.8, 6.4])
         >>> lr.render()
         (array([1, 5]), array([2.8, 5.2]))
+        >>> lr.summary
+        {'inputs': {'x': array([1, 2, 3, 4, 5]), 'y': array([2, 4, 5, 4, 5])},
+        'outputs': {'slope': 0.6000000000000001, 'intercept': 2.199999999999999},
+        'config': {}}
     """
 
     x = add_input("x")
@@ -49,7 +53,7 @@ class LinearRegression(Algorithm):
             y (ArrayLike): Output/target array.
 
         Returns:
-            Dict[str, float]: Outputs of the linear regression, including slope (m) and intercept (c).
+            Dict[str, float]: Outputs of the linear regression, including slope and intercept.
 
         Raises:
             ValueError: If the linear regression calculation fails due to linear algebra errors.
