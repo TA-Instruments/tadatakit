@@ -7,8 +7,7 @@ from tadatakit.class_generator.factory import (
     populate_classes_with_properties,
 )
 
-TEST_SCHEMA_FILE = Path(__file__).parent / "test_schema.json"
-SAMPLE_SCHEMA = load_schema(TEST_SCHEMA_FILE)
+SAMPLE_SCHEMA = load_schema()
 
 
 def test_initialize_class_registry():

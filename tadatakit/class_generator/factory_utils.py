@@ -2,22 +2,22 @@ import json
 import datetime
 import uuid
 from typing import Dict, Tuple, List, Type, Optional, Union, get_origin, get_args
+from importlib import resources
 
 from .schema_object import SchemaObject
 
 
-def load_schema(file_path: str) -> Dict:
+def load_schema() -> Dict:
     """
-    Load and return the JSON schema from a specified file path.
-
-    Args:
-        file_path (str): The file path to the JSON schema file.
+    Load and return the JSON schema from the `tainstrumentstriosdataschema` package.
 
     Returns:
         dict: The loaded JSON schema as a dictionary.
     """
-    with open(file_path) as file:
-        return json.load(file)
+    with resources.files("tainstrumentstriosdataschema").joinpath(
+        "TriosDataSchema.json"
+    ).open("r") as f:
+        return json.load(f)
 
 
 def register_classes_in_globals(globals_dict: Dict, class_registry: Dict):

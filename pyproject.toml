@@ -7,6 +7,7 @@ authors = ["Stuart Cook <stuart_cook@waters.com>"]
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 pandas = "^2.1.4"
+tainstrumentstriosdataschema = {version = "^0.0.11", source = "pypi-test"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -35,3 +36,9 @@ exclude = '''
   | dist
 )/
 '''
+
+[[tool.poetry.source]]
+name = "pypi-test"
+url = "https://test.pypi.org/simple/"
+default = false
+secondary = true

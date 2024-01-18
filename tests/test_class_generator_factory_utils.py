@@ -11,11 +11,9 @@ from tadatakit.class_generator.factory_utils import (
 )
 from tadatakit.class_generator.schema_object import SchemaObject
 
-TEST_SCHEMA_FILE = Path(__file__).parent / "test_schema.json"
-
 
 def test_load_schema():
-    schema = load_schema(TEST_SCHEMA_FILE)
+    schema = load_schema()
     assert isinstance(schema, dict)
     assert "components" in schema
     assert "schemas" in schema["components"]
@@ -30,7 +28,7 @@ def test_register_classes_in_globals():
 
 
 def test_get_schema_object_by_ref():
-    schema = load_schema(TEST_SCHEMA_FILE)
+    schema = load_schema()
     ref_str = "#/components/schemas/Number"
     ref = get_schema_object_by_ref(schema, ref_str)
     assert isinstance(ref, dict)
@@ -38,14 +36,14 @@ def test_get_schema_object_by_ref():
 
 
 def test_find_refs():
-    schema = load_schema(TEST_SCHEMA_FILE)
+    schema = load_schema()
     refs = recursively_find_refs(schema)
     assert isinstance(refs, list)
     assert "#/components/schemas/Number" in refs
 
 
 def test_split_props_by_required():
-    schema = load_schema(TEST_SCHEMA_FILE)
+    schema = load_schema()
     details_schema = get_schema_object_by_ref(schema, "#/components/schemas/Experiment")
     required_props, non_required_props = split_props_by_required(details_schema)
     assert "Sample" in required_props
@@ -60,7 +58,7 @@ def test_type_hint_generator():
 
 
 def test_identify_class_of_ref():
-    schema = load_schema(TEST_SCHEMA_FILE)
+    schema = load_schema()
     example_object_schema = get_schema_object_by_ref(
         schema, "#/components/schemas/Experiment"
     )
