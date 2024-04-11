@@ -1,6 +1,6 @@
 # TA Data Kit (tadatakit)
 
-TA Data Kit is a Python library developed by [TA Instruments](https://www.tainstruments.com/), designed for efficient parsing and handling of data exported by [TRIOS:tm: JSON Export](https://www.tainstruments.com/).
+TA Data Kit is a Python library developed by [TA Instruments](https://www.tainstruments.com/), designed for efficient parsing and handling of data exported by [TRIOS :tm: JSON Export](https://www.tainstruments.com/).
 
 ## Installation
 
@@ -8,7 +8,7 @@ TA Data Kit is a Python library developed by [TA Instruments](https://www.tainst
 
 ## Features
 
-The `tadatakit` library offers a robust suite of features designed to simplify and enhance the way you handle data from TRIOS:tm: JSON Export.
+The `tadatakit` library offers a robust suite of features designed to simplify and enhance the way you handle data from TRIOS :tm: JSON Export.
 
 - **Dynamic Class Generation:** Automatically generates Python classes from the JSON schema. This feature ensures that the data models are always in sync with the latest schema definitions, reducing maintenance overhead and potential for human error.
 
@@ -122,7 +122,7 @@ print(experiment.time_since_experiment())
 
 ## Explanation Of Approach
 
-The `tadatakit.class_generator` module within the TA Data Kit automates the creation of Python classes directly from the TA Instruments TRIOS:tm: JSON Export Schema. This process allows for dynamic and efficient handling of data that conforms to defined standards, enhancing both development speed and data integrity. Here’s how the library achieves this:
+The `tadatakit.class_generator` module within the TA Data Kit automates the creation of Python classes directly from the TA Instruments TRIOS :tm: JSON Export Schema. This process allows for dynamic and efficient handling of data that conforms to defined standards, enhancing both development speed and data integrity. Here’s how the library achieves this:
 
 ### Overview
 The library converts a JSON schema provided in an OpenAPI specification into fully functional Python classes. These classes include type hints, serialization methods, and custom behaviors, closely mirroring the structure and requirements laid out in the schema.
