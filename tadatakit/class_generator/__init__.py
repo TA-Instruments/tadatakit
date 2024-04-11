@@ -1,8 +1,12 @@
-from .factory import generate_complete_class_registry
-from .factory_utils import load_schema, register_classes_in_globals
+from .schema_loader import load_schema
+from .initialise_classes import initialise_class_registry
+from .populate_classes import add_properties_to_classes
+from .class_registry import ClassRegistry
 
 schema = load_schema()
 
-class_registry = generate_complete_class_registry(schema)
+initialise_class_registry(schema)
 
-register_classes_in_globals(globals(), class_registry)
+add_properties_to_classes()
+
+ClassRegistry.register_in_globals(globals())

@@ -20,14 +20,17 @@ def create_dataframe(
     column_dtypes: Dict[str, str] = {}
     column_names: Dict[str, str] = {}
 
-    for col, details in self.results.column_headers.items():
-        column_dtypes[col] = "float64" if details["ValueType"] == "Number" else "object"
-        unit_name = details.get("Unit", {"Name": None})["Name"]
+    for col, details in self.results.column_headers.to_dict().items():
+        column_dtypes[col] = "float64" if details["ValueType"] == "Float" else "object"
+        unit_dict = details.get("Unit")
+        unit_name = unit_dict["Name"] if unit_dict else None
         column_names[col] = details["DisplayName"]
         if unit_name is not None:
             column_names[col] += f" / {unit_name}"
 
-    df = pd.DataFrame(self.results.rows[start_index:end_index])
+    df = pd.DataFrame(
+        [row.__dict__ for row in self.results.rows[start_index:end_index]]
+    )
     df = df.astype({c: column_dtypes[c] for c in df.columns})
     return df.rename(columns=column_names)
 
@@ -45,27 +48,6 @@ def get_dataframe(self: Experiment) -> pd.DataFrame:
     return create_dataframe(self, None, None)
 
 
-def get_step_indices(self: Procedure) -> List[Tuple[int, int]]:
-    """
-    Get the start and end indices for each step in a Procedure.
-
-    Args:
-        self (Procedure): The Procedure instance.
-
-    Returns:
-        List[Tuple[int, int]]: A list of tuples containing start and end indices for each step.
-    """
-    return [
-        (
-            step.results_mapping["StartIndex"],
-            step.results_mapping["StartIndex"] + step.results_mapping["Count"],
-        )
-        if step.results_mapping is not None
-        else None
-        for step in self.steps
-    ]
-
-
 def get_dataframes_by_step(self: Experiment) -> List[Optional[pd.DataFrame]]:
     """
     Create a list of pandas DataFrames, each representing the results of a step in the Experiment.
@@ -76,12 +58,13 @@ def get_dataframes_by_step(self: Experiment) -> List[Optional[pd.DataFrame]]:
     Returns:
         List[Optional[pd.DataFrame]]: A list of DataFrames, one for each step in the Experiment's procedure.
     """
-    return [
-        create_dataframe(self, indices[0], indices[1]) if indices is not None else None
-        for indices in self.procedure.get_step_indices()
+    df = self.get_dataframe()
+    df_dict = {k: v for k, v in df.groupby("Procedure Step Id")}
+    steps = [step.name for step in self.procedure.steps]
+    return steps, [
+        df_dict.get(step_id, pd.DataFrame()) for step_id in self.procedure.steps
     ]
 
 
 setattr(Experiment, "get_dataframe", get_dataframe)
-setattr(Procedure, "get_step_indices", get_step_indices)
 setattr(Experiment, "get_dataframes_by_step", get_dataframes_by_step)

@@ -1,11 +1,12 @@
-import inspect
-import json
-import datetime
-from functools import wraps
-import os
 from typing import Any, Type, Union, get_origin, get_args, Optional, List, Dict, TextIO
+import inspect
+from functools import wraps
+import datetime
+import dateutil
+import json
+import os
 
-from .common_utils import json_serializer, snake_to_pascal
+from .utils import json_serializer, snake_to_pascal, pascal_to_snake, copy_function
 
 
 class SchemaObject:
@@ -19,18 +20,39 @@ class SchemaObject:
     _added_properties = None
     _type_hints = None
     _doc_string_base: str
+    _kwargs_type_hint = None
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs: Any):
         """
         Initialize a subclass.
 
-        This method is automatically called when a subclass of SchemaObject is created.
-        It initializes class-level dictionaries for added properties and type hints.
+        This method is automatically called during the creation of subclasses of SchemaObject.
+        It initializes dictionaries for added properties and type hints, and modifies the
+        from_dict and from_json methods' docstrings and return annotations to match the subclass.
+
+        Args:
+            **kwargs (Any): Arbitrary keyword arguments that are passed to the parent class.
         """
         super().__init_subclass__(**kwargs)
         cls._added_properties = {}
         cls._type_hints = {}
-        cls._doc_string_base = "A TA Instruments schema object.\n\nArgs:"
+        cls._doc_string_base = f"A TA Instruments `{cls.__name__}` object.\n\nArgs:"
+        cls._kwargs_type_hint = None
+        cls._update_init()
+
+        # clean up docstrings
+        from_dict_copy = copy_function(cls.from_dict)
+        from_dict_copy.__annotations__["return"] = cls.__name__
+        from_dict_copy.__doc__ = from_dict_copy.__doc__.replace(
+            "SchemaObject", cls.__name__
+        )
+        cls.from_dict = classmethod(from_dict_copy)
+        from_json_copy = copy_function(cls.from_json)
+        from_json_copy.__annotations__["return"] = cls.__name__
+        from_json_copy.__doc__ = from_json_copy.__doc__.replace(
+            "SchemaObject", cls.__name__
+        )
+        cls.from_json = classmethod(from_json_copy)
 
     @classmethod
     def add_property(
@@ -43,15 +65,91 @@ class SchemaObject:
         """
         Add a property to the schema object class.
 
+        This method adds a property to the class with an associated type hint, default value, and description.
+        It updates the __init__ method of the class to include this property.
+
         Args:
-            name (str): The name of the property.
-            type_hint (Type): The type hint for the property.
-            default (Any, optional): The default value for the property. Defaults to inspect.Parameter.empty.
-            description (str, optional): A description of the property. Defaults to an empty string.
+            name (str): The name of the property to add.
+            type_hint (Type): The type hint for the property, indicating the expected data type.
+            default (Any, optional): The default value for the property, if any. Defaults to inspect.Parameter.empty.
+            description (str, optional): A brief description of the property. Defaults to an empty string.
         """
         cls._added_properties[name] = (default, description)
         cls._type_hints[name] = type_hint
         cls._update_init()
+
+    @classmethod
+    def add_additional_properties(cls, type_hint: Type = Any):
+        """
+        Enable the schema object class to accept arbitrary keyword arguments (kwargs) with a specified type hint.
+
+        This method allows the class to accept additional properties not explicitly defined in the schema,
+        which are captured as kwargs in the __init__ method.
+
+        Args:
+            type_hint (Type, optional): The type hint for the additional properties. Defaults to Any.
+        """
+        if type_hint is None:
+            type_hint = Any
+        cls._kwargs_type_hint = type_hint
+        cls._update_init()
+
+    @classmethod
+    def _combine_multiinheritance_inits(cls):
+        """
+        Combine __init__ methods from multiple inheritance dynamically.
+
+        This method constructs a new __init__ method that integrates __init__ methods from all parent classes,
+        handling properties and kwargs appropriately. It ensures that all parent initializations are respected.
+        """
+        parameters = [
+            inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
+        ]
+        doc_string = cls._doc_string_base
+
+        kwargs_type_hint = None
+
+        for supercls in cls.__mro__[1:-2]:
+            for name, (default, description) in supercls._added_properties.items():
+                param_kind = inspect.Parameter.POSITIONAL_OR_KEYWORD
+                parameters.append(inspect.Parameter(name, param_kind, default=default))
+                type_hint_str = supercls._get_type_hint_string(
+                    supercls._type_hints[name]
+                )
+                doc_string += f"\n    {name} ({type_hint_str})"
+                if description:
+                    doc_string += ": {description}"
+
+            if supercls._kwargs_type_hint is not None:
+                kwargs_type_hint = supercls._kwargs_type_hint
+
+        if kwargs_type_hint is not None:
+            type_hint_str = cls._get_type_hint_string(kwargs_type_hint)
+            doc_string += f"\n    **kwargs: Dict[str, {type_hint_str}] (optional)"
+            parameters.append(
+                inspect.Parameter("kwargs", inspect.Parameter.VAR_KEYWORD)
+            )
+
+        new_sig = inspect.Signature(parameters)
+
+        @wraps(cls.__init__)
+        def replacement_init_function(self, *args, **kwargs):
+            bound_args = new_sig.bind(self, *args, **kwargs)
+            bound_args.apply_defaults()
+            super_kwargs = {}
+            for supercls in cls.__mro__[1:-2]:
+                super_params = inspect.signature(supercls.__init__).parameters
+                for name, value in bound_args.arguments.items():
+                    if name != "self" and name != "kwargs" and name in super_params:
+                        super_kwargs[name] = value
+                if "kwargs" in super_params:
+                    for name, value in bound_args.arguments.get("kwargs", {}).items():
+                        super_kwargs[name] = value
+                supercls.__init__(self, **super_kwargs)
+
+        cls.__init__ = replacement_init_function
+        cls.__init__.__signature__ = new_sig
+        cls.__init__.__doc__ = doc_string
 
     @classmethod
     def _update_init(cls):
@@ -75,6 +173,13 @@ class SchemaObject:
             if description:
                 doc_string += ": {description}"
 
+        if cls._kwargs_type_hint is not None:
+            type_hint_str = cls._get_type_hint_string(cls._kwargs_type_hint)
+            doc_string += f"\n    **kwargs: Dict[str, {type_hint_str}] (optional)"
+            parameters.append(
+                inspect.Parameter("kwargs", inspect.Parameter.VAR_KEYWORD)
+            )
+
         new_sig = inspect.Signature(parameters)
 
         @wraps(cls.__init__)
@@ -82,23 +187,36 @@ class SchemaObject:
             bound_args = new_sig.bind(self, *args, **kwargs)
             bound_args.apply_defaults()
             for name, value in bound_args.arguments.items():
-                if name != "self":
+                if name != "self" and name != "kwargs":
                     expected_type = cls._type_hints[name]
                     if value is not None and not is_instance(value, expected_type):
                         try:
                             class_for_casting = get_class_from_type_hint(expected_type)
                             if class_for_casting is datetime.datetime:
-                                value = datetime.datetime.strptime(
-                                    value, "%Y-%m-%dT%H:%M:%S.%fZ"
-                                )
+                                value = dateutil.parser.parse(value)
                             else:
                                 value = class_for_casting(value)
                         except (ValueError, TypeError) as e:
-                            print(get_class_from_type_hint(expected_type))
                             raise TypeError(
                                 f"Argument '{name}' must be of type {expected_type} (value:{value}, type:{type(value)})"
                             ) from e
                     setattr(self, name, value)
+
+            if "kwargs" in bound_args.arguments and cls._kwargs_type_hint is not None:
+                for key, value in bound_args.arguments["kwargs"].items():
+                    expected_type = cls._kwargs_type_hint
+                    if value is not None and not is_instance(value, expected_type):
+                        try:
+                            class_for_casting = get_class_from_type_hint(expected_type)
+                            if class_for_casting is datetime.datetime:
+                                value = dateutil.parser.parse(value)
+                            else:
+                                value = class_for_casting(value)
+                        except (ValueError, TypeError) as e:
+                            raise TypeError(
+                                f"Argument '{name}' must be of type {expected_type} (value:{value}, type:{type(value)})"
+                            ) from e
+                    self.__dict__[key] = value
 
         cls.__init__ = replacement_init_function
         cls.__init__.__signature__ = new_sig
@@ -135,7 +253,7 @@ class SchemaObject:
     @classmethod
     def from_json(cls, path_to_json: str) -> "SchemaObject":
         """
-        Initialize an instance of the class from a JSON file or string that conforms to the schema.
+        Initialize an instance of the class from a JSON file.
 
         Args:
             path_to_json (str): Path to the JSON input file.
@@ -151,7 +269,7 @@ class SchemaObject:
     @classmethod
     def from_dict(cls, data_dict: dict, path: str = "") -> "SchemaObject":
         """
-        Recursive helper method to instantiate objects from a dictionary.
+        Recursive method to instantiate objects from a dictionary.
 
         Args:
             data_dict (dict): The dictionary containing data to instantiate the object.
@@ -164,51 +282,14 @@ class SchemaObject:
             TypeError: If a required argument is missing or if there is a type mismatch.
         """
         kwargs = {}
-        for prop_name, type_hint in cls._type_hints.items():
-            pascal_case_name = snake_to_pascal(prop_name)
-            current_path = f"{path}.{pascal_case_name}" if path else pascal_case_name
-
-            if pascal_case_name in data_dict:
-                value = data_dict[pascal_case_name]
-                try:
-                    if is_optional_list_of_schema_objects(type_hint):
-                        list_type = get_args(get_args(type_hint)[0])[0]
-                        if value is not None:
-                            kwargs[prop_name] = [
-                                list_type.from_dict(item, f"{current_path}[{index}]")
-                                for index, item in enumerate(value)
-                            ]
-                    elif inspect.isclass(type_hint) and issubclass(
-                        type_hint, SchemaObject
-                    ):
-                        kwargs[prop_name] = type_hint.from_dict(value, current_path)
-                    elif is_optional_type(type_hint) and issubclass(
-                        get_args(type_hint)[0], SchemaObject
-                    ):
-                        if value is not None:
-                            kwargs[prop_name] = get_args(type_hint)[0].from_dict(
-                                value, current_path
-                            )
-                    elif get_origin(type_hint) is list and issubclass(
-                        get_args(type_hint)[0], SchemaObject
-                    ):
-                        kwargs[prop_name] = [
-                            get_args(type_hint)[0].from_dict(
-                                item, f"{current_path}[{index}]"
-                            )
-                            for index, item in enumerate(value)
-                        ]
-                    else:
-                        # print(prop_name, type_hint)
-                        kwargs[prop_name] = value
-                except (TypeError, AttributeError) as e:
-                    raise TypeError(f"Error at {current_path}: {str(e)}") from e
+        for kw, value in data_dict.items():
+            snake_case_name = pascal_to_snake(kw)
+            current_path = f"{path}.{kw}" if path else kw
+            if snake_case_name in cls._type_hints:
+                type_hint = cls._type_hints.get(snake_case_name)
             else:
-                # Check if the property is optional
-                if not is_optional_type(type_hint):
-                    raise TypeError(
-                        f"Missing required argument at {current_path} (type_hint:{type_hint})"
-                    )
+                type_hint = cls._kwargs_type_hint
+            kwargs[snake_case_name] = cls.process_value(value, type_hint, current_path)
 
         try:
             return cls(**kwargs)
@@ -217,9 +298,63 @@ class SchemaObject:
                 f"Error at {path} (while constructing {cls.__name__}): {str(e)}"
             ) from e
 
+    @staticmethod
+    def process_value(value: Any, type_hint: Type, current_path: str) -> Any:
+        """
+        Processes a value according to its type hint and the current path within the object hierarchy.
+
+        This method processes the given value based on the provided type hint. It handles complex types, such as lists of
+        SchemaObject instances or optional types. The processing ensures that the value conforms to the expected type,
+        performing necessary conversions or validations.
+
+        Args:
+            value (Any): The value to be processed.
+            type_hint (Type): The type hint for the value, which may indicate a simple type, a SchemaObject subclass,
+                            or a complex structure like lists or unions.
+            current_path (str): The current path within the object hierarchy, used for error reporting and tracking during recursion.
+
+        Returns:
+            Any: The processed value, potentially converted or validated against the type hint.
+
+        Raises:
+            TypeError: If the value cannot be converted to the required type or if any type constraint is violated.
+        """
+        try:
+            if type_hint is None or type_hint == Any:
+                processed_value = value
+            elif is_optional_list_of_schema_objects(type_hint):
+                list_type = get_args(get_args(type_hint)[0])[0]
+                if value is not None:
+                    processed_value = [
+                        list_type.from_dict(item, f"{current_path}[{index}]")
+                        for index, item in enumerate(value)
+                    ]
+            elif inspect.isclass(type_hint) and issubclass(type_hint, SchemaObject):
+                processed_value = type_hint.from_dict(value, current_path)
+            elif is_optional_type(type_hint) and issubclass(
+                get_args(type_hint)[0], SchemaObject
+            ):
+                if value is not None:
+                    processed_value = get_args(type_hint)[0].from_dict(
+                        value, current_path
+                    )
+            elif get_origin(type_hint) is list and issubclass(
+                get_args(type_hint)[0], SchemaObject
+            ):
+                processed_value = [
+                    get_args(type_hint)[0].from_dict(item, f"{current_path}[{index}]")
+                    for index, item in enumerate(value)
+                ]
+            else:
+                processed_value = value
+        except (TypeError, AttributeError) as e:
+            raise TypeError(f"Error at {current_path}: {str(e)}") from e
+
+        return processed_value
+
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert the SchemaObject instance to a dictionary representation compatible with the schema.
+        Convert the instance to a dictionary representation compatible with the schema.
 
         This method recursively converts all properties of the SchemaObject, including nested SchemaObject instances,
         into a dictionary format.
@@ -228,8 +363,7 @@ class SchemaObject:
             Dict[str, Any]: A dictionary representation of the SchemaObject instance.
         """
         result = {}
-        for prop_name, _ in self._type_hints.items():
-            value = getattr(self, prop_name, None)
+        for prop_name, value in self.__dict__.items():
             if isinstance(value, SchemaObject):
                 result[snake_to_pascal(prop_name)] = value.to_dict()
             elif (
@@ -240,9 +374,9 @@ class SchemaObject:
                 result[snake_to_pascal(prop_name)] = value
         return result
 
-    def to_json(self, path_or_file: [str, os.PathLike, TextIO]) -> None:
+    def to_json(self, path_or_file: Union[str, os.PathLike, TextIO]) -> None:
         """
-        Write the SchemaObject instance to a JSON file.
+        Write the instance to a JSON file.
 
         This method saves the dictionary representation of the SchemaObject instance
         to a specified JSON file, file object, pathlib Path, or any object implementing os.PathLike.
@@ -274,6 +408,8 @@ def is_instance(obj: Any, type_hint: Type) -> bool:
         TypeError: If there is an issue with the type hint or the object during type checking.
     """
     try:
+        if type_hint is Any:
+            return True
         if get_origin(type_hint) is Union:
             return any(is_instance(obj, arg) for arg in get_args(type_hint))
         elif get_origin(type_hint) is list and isinstance(obj, list):
