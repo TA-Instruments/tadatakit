@@ -149,8 +149,6 @@ If the schema specifies inheritance (using `allOf`) or composition (using `anyOf
 #### 7. Registration and Accessibility
 Generated classes are registered in a global class registry within the library. This registry allows for easy retrieval and instantiation of classes based on schema names, supporting dynamic access and manipulation of data in a type-safe manner.
 
-Certainly! Including a "Contributing" section in your README.md is a great way to encourage community involvement and guide potential contributors. Here's how you can structure this section along with a markdown link to a separate `CONTRIBUTING.md` file located in the same directory:
-
 ## Contributing
 
 We welcome contributions from the community and are pleased to have you join us in improving `tadatakit`. Whether you are fixing bugs, adding new features, improving documentation, or suggesting new functionalities, your input is valuable!
