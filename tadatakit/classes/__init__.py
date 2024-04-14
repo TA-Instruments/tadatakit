@@ -1,6 +1,6 @@
 import pandas as pd
-from typing import Dict, Optional, List, Tuple
-from tadatakit.class_generator import Experiment, Procedure
+from typing import Dict, Optional, List
+from tadatakit.class_generator import Experiment
 
 
 def create_dataframe(

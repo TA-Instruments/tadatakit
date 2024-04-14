@@ -1,12 +1,8 @@
 from .schema_loader import load_schema
-from .initialise_classes import initialise_class_registry
-from .populate_classes import add_properties_to_classes
-from .class_registry import ClassRegistry
+from .definition_registry import DefinitionRegistry
 
 schema = load_schema()
 
-initialise_class_registry(schema)
+definition_registry = DefinitionRegistry(schema)
 
-add_properties_to_classes()
-
-ClassRegistry.register_in_globals(globals())
+definition_registry.register_in_globals(globals())

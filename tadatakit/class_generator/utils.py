@@ -1,7 +1,55 @@
+from typing import Type, Any, get_origin, get_args, Union, Dict, Tuple
 import re
 import datetime
-from typing import Tuple, Dict, Any
-from types import FunctionType
+
+
+def type_hint_to_str(type_hint: Type) -> str:
+    """
+    Get a string representation of a type hint.
+
+    Args:
+        type_hint (Type): The type hint to convert to a string.
+
+    Returns:
+        str: A string representation of the type hint.
+    """
+    try:
+        return type_hint.__name__
+    except AttributeError:
+        return (
+            type_hint.__str__()
+            .replace("typing.", "")
+            .replace("tadatakit.class_generator.definition_registry.", "")
+        )
+
+
+def is_instance(obj: Any, type_hint: Type) -> bool:
+    """
+    Custom type check that understands typing module constructs, such as Union and List.
+
+    Args:
+        obj (Any): The object to check.
+        type_hint (Type): The type hint against which the object is to be checked.
+
+    Returns:
+        bool: True if obj is an instance of type_hint, False otherwise.
+
+    Raises:
+        TypeError: If there is an issue with the type hint or the object during type checking.
+    """
+    try:
+        if type_hint is Any:
+            return True
+        if get_origin(type_hint) is Union:
+            return any(is_instance(obj, arg) for arg in get_args(type_hint))
+        elif get_origin(type_hint) is list and isinstance(obj, list):
+            element_type = get_args(type_hint)[0]
+            return all(isinstance(elem, element_type) for elem in obj)
+        elif isinstance(obj, type_hint):
+            return True
+        return False
+    except TypeError as e:
+        raise TypeError(f"type_hint: {type_hint}, obj: {obj}") from e
 
 
 def pascal_to_snake(name: str) -> str:
@@ -80,28 +128,3 @@ def split_props_by_required(definition: Dict) -> Tuple[Dict, Dict]:
     non_required_props = {p: properties[p] for p in properties if p not in required}
 
     return required_props, non_required_props
-
-
-def copy_function(original_function: FunctionType) -> FunctionType:
-    """
-    Creates a copy of a given function.
-
-    This method duplicates a function, including its code, globals, name, defaults,
-    closures, and other attributes, making a full copy that behaves like the original.
-
-    Args:
-        original_function (FunctionType): The function to copy.
-
-    Returns:
-        FunctionType: A duplicate of the original function.
-    """
-    duplicate_function = FunctionType(
-        original_function.__code__,
-        original_function.__globals__,
-        original_function.__name__,
-        original_function.__defaults__,
-        original_function.__closure__,
-    )
-    duplicate_function.__dict__.update(original_function.__dict__)
-    duplicate_function.__annotations__.update(original_function.__annotations__)
-    return duplicate_function
