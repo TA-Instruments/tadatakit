@@ -12,10 +12,7 @@ class PolymorphFactory:
             for mapping_value, ref in definition["discriminator"]["mapping"].items()
         }
 
-    def discriminate(self, **kwargs):
-        return self.discriminator_mapping[kwargs[self.discriminator_property]](**kwargs)
-
-    def from_dict(self, data_dict: Dict):
-        return self.discriminator_mapping[
-            data_dict[self.discriminator_property]
-        ].from_dict(data_dict)
+    def discriminate(self, data_dict: Dict):
+        return self.discriminator_mapping[data_dict[self.discriminator_property]](
+            data_dict
+        )

@@ -164,7 +164,7 @@ class DefinitionRegistry:
             type_hint = Union[tuple(union_type_hints)]
             if "discriminator" in definition:
                 polymorph_factory = PolymorphFactory(self, definition)
-                return type_hint, polymorph_factory.from_dict
+                return type_hint, polymorph_factory.discriminate
             else:
                 return type_hint, lambda x: x
         elif (def_type := definition.get("type")) in native_type_mapping:
