@@ -1,5 +1,7 @@
 import pandas as pd
 from typing import Dict, Optional, List
+from uuid import UUID
+
 from tadatakit.class_generator import Experiment
 
 
@@ -32,6 +34,7 @@ def create_dataframe(
         [row.__dict__ for row in self.results.rows[start_index:end_index]]
     )
     df = df.astype({c: column_dtypes[c] for c in df.columns})
+    df["Procedure Step Id"] = df["Procedure Step Id"].apply(UUID)
     return df.rename(columns=column_names)
 
 
@@ -62,7 +65,7 @@ def get_dataframes_by_step(self: Experiment) -> List[Optional[pd.DataFrame]]:
     df_dict = {k: v for k, v in df.groupby("Procedure Step Id")}
     steps = [step.name for step in self.procedure.steps]
     return steps, [
-        df_dict.get(step_id, pd.DataFrame()) for step_id in self.procedure.steps
+        df_dict.get(step.id, pd.DataFrame()) for step in self.procedure.steps
     ]
 
 
