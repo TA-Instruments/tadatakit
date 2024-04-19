@@ -45,6 +45,16 @@ class SchemaObject:
         """
         pass
 
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        full_str = f"{self.__class__.__name__}({','.join([f'{k}={v.__repr__()}' for k, v in self.__dict__.items()])})"
+        if len(full_str) > 200:
+            return f"{self.__class__.__name__}(...)"
+        else:
+            return full_str
+
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         cls._added_properties = {}
