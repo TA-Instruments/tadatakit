@@ -13,6 +13,7 @@ from .utils import (
     snake_to_pascal,
     pascal_to_snake,
     json_serializer,
+    copy_function,
 )
 
 native_type_mapping = {
@@ -32,6 +33,22 @@ native_format_mapping = {
 
 
 class SchemaObject:
+    """
+    Base class for dynamically generated schema objects from schema definitions.
+
+    This class provides a framework for instances that are dynamically created based on JSON schemas,
+    supporting automatic property addition, type casting, and initialization based on schema specifications.
+    It uses a metaprogramming approach to adapt its structure dynamically to the schema definitions provided.
+    This includes handling complex schemas that require custom property management, type coercion, and support
+    for additional properties.
+
+    Methods:
+        from_json: Class method to create an instance from a JSON file.
+        from_dict: Class method to create an instance from a dictionary.
+        to_dict: Converts the instance to a dictionary following the schema's structure.
+        to_json: Serializes the instance to a JSON file.
+    """
+
     _added_properties = None
     _type_hints = None
     _doc_string_base: str
@@ -46,9 +63,29 @@ class SchemaObject:
         pass
 
     def __str__(self):
+        """
+        Returns a string representation of the SchemaObject instance.
+
+        This method is a simple alias to `__repr__` to ensure the string representation is consistent whether
+        `str()` or `repr()` is called on an instance of SchemaObject.
+
+        Returns:
+            str: The string representation of the SchemaObject.
+        """
         return self.__repr__()
 
     def __repr__(self):
+        """
+        Returns a detailed string representation of the SchemaObject instance.
+
+        Constructs a string that includes the class name and a comma-separated list of property-value pairs for
+        each property stored in the instance's dictionary. If the resulting string is too long (more than 200 characters),
+        it simplifies the output to show only the class name followed by ellipses, indicating a large number of properties
+        or extensive data (e.g. `Experiment(...)`).
+
+        Returns:
+            str: The detailed string representation of the SchemaObject, possibly abbreviated.
+        """
         full_str = f"{self.__class__.__name__}({','.join([f'{k}={v.__repr__()}' for k, v in self.__dict__.items()])})"
         if len(full_str) > 200:
             return f"{self.__class__.__name__}(...)"
@@ -56,22 +93,69 @@ class SchemaObject:
             return full_str
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        """
+        Customizes subclass initialization to support dynamic property additions and initialization.
+
+        This hook automatically initializes certain class-level attributes that support the dynamic creation and
+        management of properties based on schema definitions. It sets up structures to hold added properties,
+        constructs a base documentation string, and prepares for additional properties not explicitly defined in
+        the schema but allowed by it.
+
+        Args:
+            **kwargs (Any): Arbitrary keyword arguments that are passed to the base class's __init_subclass__ method,
+                            in case they are needed in the future.
+
+        Returns:
+            None
+        """
         super().__init_subclass__(**kwargs)
         cls._added_properties = {}
         cls._doc_string_base = f"A TA Instruments `{cls.__name__}` object.\n\nArgs:"
         cls._kwargs_property = None
         cls._update_init()
 
-    # TODO: Clean docstrings?
+        # clean up docstrings
+        from_dict_copy = copy_function(cls.from_dict)
+        from_dict_copy.__annotations__["return"] = cls.__name__
+        from_dict_copy.__doc__ = from_dict_copy.__doc__.replace(
+            "SchemaObject", cls.__name__
+        )
+        cls.from_dict = classmethod(from_dict_copy)
+        from_json_copy = copy_function(cls.from_json)
+        from_json_copy.__annotations__["return"] = cls.__name__
+        from_json_copy.__doc__ = from_json_copy.__doc__.replace(
+            "SchemaObject", cls.__name__
+        )
+        cls.from_json = classmethod(from_json_copy)
 
     @classmethod
-    def add_property(
+    def _add_property(
         cls,
         name: str,
         caster: Any,
         type_hint: Type,
         default: Any = inspect.Parameter.empty,
     ):
+        """
+        Dynamically adds a property to the class with specified casting and type hinting.
+
+        This method is used internally to add properties to schema objects based on schema definitions.
+        Each property can have a type hint and a caster function associated with it, which are used to ensure
+        that values assigned to these properties are of the correct type or are coerced into the correct type
+        dynamically. A default value can also be specified, which is used if no value is provided when creating
+        an instance of the class.
+
+        Args:
+            name (str): The name of the property to add.
+            caster (Any): A function or type to cast the input value to the correct type. This can be a built-in
+                          type like `int` or `str`, or a more complex function that performs validation and conversion.
+            type_hint (Type): The type hint for the property, used for documentation and runtime checks in some contexts.
+            default (Any, optional): The default value for the property if none is specified. Defaults to `inspect.Parameter.empty`,
+                                     which indicates that there is no default value (i.e., the property is required).
+
+        Returns:
+            None
+        """
         cls._added_properties[name] = {
             "caster": caster,
             "type_hint": type_hint,
@@ -80,7 +164,23 @@ class SchemaObject:
         cls._update_init()
 
     @classmethod
-    def add_additional_properties(cls, caster: Any = None, type_hint: Type = Any):
+    def _add_additional_properties(cls, caster: Any = None, type_hint: Type = Any):
+        """
+        Allows the class to accept additional properties beyond those explicitly defined, with specified type casting.
+
+        This method sets up a mechanism for the class to manage additional properties that are not predefined in the
+        schema but are allowed by it. It assigns a caster function and a type hint to these additional properties,
+        ensuring they adhere to expected data types or are transformed appropriately upon assignment.
+
+        Args:
+            caster (Any, optional): A function to cast values of additional properties to the appropriate type.
+                                    If no caster is provided, values will be used as they are given.
+            type_hint (Type, optional): A type hint for the additional properties. Defaults to `Any`, which allows
+                                        any type of value.
+
+        Returns:
+            None
+        """
         if type_hint is None:
             type_hint = Any
         cls._kwargs_property = {
@@ -91,6 +191,21 @@ class SchemaObject:
 
     @classmethod
     def _update_init(cls):
+        """
+        Dynamically updates the constructor method to incorporate newly added properties and additional keyword arguments.
+
+        This method constructs a new `__init__` method based on dynamically added properties, ensuring that the constructor
+        accepts and correctly initializes all properties defined by the schema. It adjusts the constructor's signature to
+        include parameters for all registered properties with appropriate type hints and default values. It also handles
+        additional properties if they have been enabled for the class.
+
+        The new constructor ensures that each parameter is correctly cast using the provided caster functions and that
+        all properties are set on the instance accordingly. If properties are provided via `kwargs` and are not defined
+        explicitly in the class, they are also processed and added to the instance.
+
+        Returns:
+            None
+        """
         parameters = [
             inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
         ]
@@ -167,10 +282,20 @@ class SchemaObject:
     @classmethod
     def _combine_multiinheritance_inits(cls):
         """
-        Combine __init__ methods from multiple inheritance dynamically.
+        Dynamically creates a unified constructor that merges the initialization processes of multiple inherited classes.
 
-        This method constructs a new __init__ method that integrates __init__ methods from all parent classes,
-        handling properties and kwargs appropriately. It ensures that all parent initializations are respected.
+        This method is crucial for classes that inherit from multiple parents with their own custom initialization logic.
+        It constructs a new `__init__` method that integrates `__init__` methods from all parent classes, ensuring
+        that properties from each parent are initialized appropriately and that all inherited initialization behaviors are
+        respected.
+
+        This process involves constructing a new signature that includes all parameters from parent constructors,
+        including both explicitly defined properties and `kwargs` if applicable. The resulting `__init__` method
+        sets properties on the instance based on these parameters and respects default values and type annotations
+        provided by the parent classes.
+
+        Returns:
+            None
         """
         parameters = [
             inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
@@ -229,13 +354,20 @@ class SchemaObject:
     @classmethod
     def from_json(cls, path_or_file: Union[str, os.PathLike, TextIO]) -> "SchemaObject":
         """
-        Initialize an instance of the class from a JSON file or file-like object.
+        Creates an instance of the class by reading from a JSON file or file-like object.
 
         Args:
-            path_or_file (Union[str, os.PathLike, TextIO]): Path to the JSON input file or a file-like object.
+            path_or_file (Union[str, os.PathLike, TextIO]): The path to a JSON file or a file-like object
+                                                            that can be read from.
 
         Returns:
-            SchemaObject: An instance of the class initialized with data from the JSON input.
+            SchemaObject: A new instance of the class, initialized with data extracted from the JSON file.
+
+        Raises:
+            FileNotFoundError: If the specified file does not exist.
+            JSONDecodeError: If the file is not a valid JSON.
+            TypeError: If a required property is missing or if there is a type mismatch, indicating that the
+                       dictionary does not perfectly align with the class's expected attributes.
         """
         if isinstance(path_or_file, (str, os.PathLike)):
             with open(path_or_file, "r") as file:
@@ -246,18 +378,23 @@ class SchemaObject:
         return cls.from_dict(data)
 
     @classmethod
-    def from_dict(cls, data_dict: dict) -> "SchemaObject":
+    def from_dict(cls, data_dict: Dict) -> "SchemaObject":
         """
-        Recursive method to instantiate objects from a dictionary.
+        Instantiates an object from a dictionary representation, typically used for deserialization.
+        It converts dictionary keys to the appropriate snake_case format expected by the class' attributes,
+        if necessary, and then attempts to create an instance by passing the processed dictionary as keyword
+        arguments to the class constructor.
 
         Args:
-            data_dict (dict): The dictionary containing data to instantiate the object.
+            data_dict (Dict): The dictionary containing data with which to instantiate the object. Keys should
+                              correspond to the attribute names of the class and their values to the attribute values.
 
         Returns:
             SchemaObject: An instance of the class initialized with data from the dictionary.
 
         Raises:
-            TypeError: If a required argument is missing or if there is a type mismatch.
+            TypeError: If a required property is missing or if there is a type mismatch, indicating that the
+                       dictionary does not perfectly align with the class's expected attributes.
         """
         data_dict = {pascal_to_snake(k): v for k, v in data_dict.items()}
         try:
@@ -267,13 +404,15 @@ class SchemaObject:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert the instance to a dictionary representation compatible with the schema.
+        Converts the instance to a dictionary representation that is compatible with the schema.
 
         This method recursively converts all properties of the SchemaObject, including nested SchemaObject instances,
-        into a dictionary format.
+        into a dictionary format, following the naming conventions required by the schema. This allows the object
+        to be easily serialized into JSON or another dictionary-based format.
 
         Returns:
-            Dict[str, Any]: A dictionary representation of the SchemaObject instance.
+            Dict[str, Any]: A dictionary representation of the SchemaObject instance, with property names converted
+                            to PascalCase to align with the schema.
         """
         result = {}
         for prop_name, value in self.__dict__.items():
@@ -289,18 +428,27 @@ class SchemaObject:
 
     def to_json(self, path_or_file: Union[str, os.PathLike, TextIO]) -> None:
         """
-        Write the instance to a JSON file.
+        Serializes the instance to a JSON file or stream.
 
-        This method saves the dictionary representation of the SchemaObject instance
-        to a specified JSON file, file object, pathlib Path, or any object implementing os.PathLike.
+        This method saves the dictionary representation of the SchemaObject instance to a JSON file
+        or a file-like object.
 
         Args:
-            path_or_file (Union[str, os.PathLike, TextIO]): The file path where the JSON should be saved,
-                                                                   a file object to write to, or an object representing
-                                                                   a file system path
+            path_or_file (Union[str, os.PathLike, TextIO]): The file path or file-like object where the JSON
+                                                            should be saved. If a string or os.PathLike is provided,
+                                                            it is treated as a file path. If a file-like object is
+                                                            provided, the JSON is written directly to it.
+
+        Returns:
+            None
+
+        Raises:
+            IOError: If an error occurs during file writing.
+            TypeError: If an object within the SchemaObject cannot be serialized using the default JSON encoder
+                       or the custom serializer (`json_serializer`).
         """
         if isinstance(path_or_file, (str, os.PathLike)):
             with open(path_or_file, "w") as file:
-                json.dump(self.to_dict(), file, indent=4, default=json_serializer)
+                json.dump(self.to_dict(), file, indent=2, default=json_serializer)
         else:
-            json.dump(self.to_dict(), path_or_file, indent=4, default=json_serializer)
+            json.dump(self.to_dict(), path_or_file, indent=2, default=json_serializer)

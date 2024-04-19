@@ -1,4 +1,5 @@
 from typing import Type, Any, get_origin, get_args, Union, Dict, Tuple
+from types import FunctionType
 import re
 import datetime
 
@@ -136,3 +137,28 @@ def split_props_by_required(definition: Dict) -> Tuple[Dict, Dict]:
     non_required_props = {p: properties[p] for p in properties if p not in required}
 
     return required_props, non_required_props
+
+
+def copy_function(original_function: FunctionType) -> FunctionType:
+    """
+    Creates a copy of a given function.
+
+    This method duplicates a function, including its code, globals, name, defaults,
+    closures, and other attributes, making a full copy that behaves like the original.
+
+    Args:
+        original_function (FunctionType): The function to copy.
+
+    Returns:
+        FunctionType: A duplicate of the original function.
+    """
+    duplicate_function = FunctionType(
+        original_function.__code__,
+        original_function.__globals__,
+        original_function.__name__,
+        original_function.__defaults__,
+        original_function.__closure__,
+    )
+    duplicate_function.__dict__.update(original_function.__dict__)
+    duplicate_function.__annotations__.update(original_function.__annotations__)
+    return duplicate_function

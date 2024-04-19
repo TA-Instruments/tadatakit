@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, Optional, List
+from typing import Dict, Optional
 from uuid import UUID
 
 from tadatakit.class_generator import Experiment
@@ -9,15 +9,20 @@ def create_dataframe(
     self: Experiment, start_index: Optional[int] = None, end_index: Optional[int] = None
 ) -> pd.DataFrame:
     """
-    Create a pandas DataFrame from the results in an Experiment object.
+    Generates a pandas DataFrame from a slice of the results within this Experiment instance.
+
+    This method processes the results of an experiment to create a DataFrame that is useful for
+    further analysis or visualization. It optionally slices the results using provided indices.
 
     Args:
-        self (Experiment): The Experiment instance.
-        start_index (Optional[int]): The starting index for slicing the results. Defaults to None.
-        end_index (Optional[int]): The ending index for slicing the results. Defaults to None.
+        start_index (Optional[int]): The starting index for slicing the results. Defaults to None, which
+                                     starts from the first result.
+        end_index (Optional[int]): The ending index for slicing the results. Defaults to None, which
+                                   goes up to the last result.
 
     Returns:
-        pd.DataFrame: A DataFrame representation of the Experiment's results.
+        pd.DataFrame: A DataFrame representation of the Experiment's results, with appropriate
+                      data types and units applied to the columns.
     """
     column_dtypes: Dict[str, str] = {}
     column_names: Dict[str, str] = {}
@@ -40,10 +45,7 @@ def create_dataframe(
 
 def get_dataframe(self: Experiment) -> pd.DataFrame:
     """
-    Create a pandas DataFrame containing all results from the Experiment object.
-
-    Args:
-        self (Experiment): The Experiment instance.
+    Retrieves a DataFrame containing all results from the Experiment.
 
     Returns:
         pd.DataFrame: A DataFrame containing all results of the Experiment.
@@ -51,15 +53,17 @@ def get_dataframe(self: Experiment) -> pd.DataFrame:
     return create_dataframe(self, None, None)
 
 
-def get_dataframes_by_step(self: Experiment) -> List[Optional[pd.DataFrame]]:
+def get_dataframes_by_step(self: Experiment) -> Dict[str, pd.DataFrame]:
     """
-    Create a list of pandas DataFrames, each representing the results of a step in the Experiment.
+    Generates a dictionary of pandas DataFrames, each representing the results of a
+    specific step in the Experiment.
 
-    Args:
-        self (Experiment): The Experiment instance.
+    This method organizes the experiment results into separate DataFrames for each step
+    based on the "Procedure Step Id".
 
     Returns:
-        List[Optional[pd.DataFrame]]: A list of DataFrames, one for each step in the Experiment's procedure.
+        Dict[str, pd.DataFrame]: A dictionary where the keys are step names and the values are DataFrames
+                                 containing the results for each respective step.
     """
     df = self.get_dataframe()
     df_dict = {k: v for k, v in df.groupby("Procedure Step Id")}
