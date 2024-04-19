@@ -52,6 +52,9 @@ def is_instance(obj: Any, type_hint: Type) -> bool:
         raise TypeError(f"type_hint: {type_hint}, obj: {obj}") from e
 
 
+special_names_set = set()
+
+
 def pascal_to_snake(name: str) -> str:
     """
     Converts a PascalCase string to a snake_case string.
@@ -68,6 +71,9 @@ def pascal_to_snake(name: str) -> str:
         str: The converted snake_case string, or the original string if it is not a valid identifier.
     """
     if not name.isidentifier():
+        return name
+    elif "_" in name:
+        special_names_set.add(name)
         return name
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
@@ -88,6 +94,8 @@ def snake_to_pascal(name: str) -> str:
         str: The converted PascalCase string, or the original string if it is not a valid identifier.
     """
     if not name.isidentifier():
+        return name
+    elif name in special_names_set:
         return name
     return "".join(x.title() for x in name.split("_"))
 
