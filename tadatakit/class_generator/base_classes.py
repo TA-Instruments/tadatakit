@@ -1,5 +1,5 @@
 from datetime import datetime
-import dateutil
+from dateutil import parser as dateutil_parser
 from uuid import UUID
 from typing import Any, Type, Union, TextIO, Dict
 import inspect
@@ -110,7 +110,9 @@ class SchemaObject:
         """
         super().__init_subclass__(**kwargs)
         cls._added_properties = {}
-        cls._doc_string_base = f"A TA Instruments `{cls.__name__}` object.\n\nArgs:"
+        cls._doc_string_base = (
+            f"Initialise a TA Instruments `{cls.__name__}` object.\n\nArgs:"
+        )
         cls._kwargs_property = None
         cls._update_init()
 
@@ -250,7 +252,7 @@ class SchemaObject:
                         try:
                             caster = cls._added_properties[name]["caster"]
                             if caster is datetime:
-                                value = dateutil.parser.parse(value)
+                                value = dateutil_parser.parse(value)
                             else:
                                 value = caster(value)
                         except (ValueError, TypeError) as e:
@@ -266,7 +268,7 @@ class SchemaObject:
                         try:
                             caster = cls._kwargs_property["caster"]
                             if caster is datetime:
-                                value = dateutil.parser.parse(value)
+                                value = dateutil_parser.parse(value)
                             else:
                                 value = caster(value)
                         except (ValueError, TypeError) as e:

@@ -3,7 +3,7 @@ import os
 import json
 from collections import defaultdict
 from datetime import datetime
-import dateutil
+from dateutil import parser as dateutil_parser
 
 from .base_classes import native_type_mapping, native_format_mapping, SchemaObject
 from .polymorph_factory import PolymorphFactory
@@ -48,7 +48,16 @@ class DefinitionRegistry:
         self._schema = schema
         self._type_hints = {}
         self._casters = {}
-        self._definitions = self._schema.get("components", {}).get("schemas", {})
+        self._definitions = schema.get("$defs", {})
+        self._definitions.update(
+            {
+                schema["title"]: {
+                    k: v
+                    for k, v in schema.items()
+                    if not k.startswith("$") and k != "title"
+                }
+            }
+        )
         self.initialise_definitions()
 
     @classmethod
@@ -145,8 +154,8 @@ class DefinitionRegistry:
         category. The definitions are categorized as follows:
         - 'passthrough': Definitions that refer directly to another definition using `$ref`.
         - 'multi-inheritance': Definitions that use `allOf` indicating inheritance from multiple types.
-        - 'polymorph': Definitions using `oneOf` with a `discriminator` to support polymorphic behavior.
-        - 'union': Definitions using `oneOf` without a `discriminator` to represent a union of types.
+        - 'polymorph': Definitions using `allOf` with conditions, typically involving 'if' and 'then' to support polymorphic behavior.
+        - 'union': Definitions using `oneOf` or `anyOf` to represent a union of types.
         - 'custom': Definitions representing complex objects.
         - 'list': Definitions representing arrays.
         - 'native': Definitions that map directly to native Python types.
@@ -164,12 +173,15 @@ class DefinitionRegistry:
         if "$ref" in definition:
             return "passthrough"
         elif "allOf" in definition:
-            return "multi-inheritance"
-        elif "oneOf" in definition:
-            if "discriminator" in definition:
+            if all(
+                "if" in condition and "then" in condition
+                for condition in definition["allOf"]
+            ):
                 return "polymorph"
             else:
-                return "union"
+                return "multi-inheritance"
+        elif "oneOf" in definition or "anyOf" in definition:
+            return "union"
         elif (def_type := definition.get("type")) in native_type_mapping:
             if def_type == "object":
                 return "custom"
@@ -178,7 +190,9 @@ class DefinitionRegistry:
             else:
                 return "native"
         else:
-            raise DefinitionUnidentifiedError(f"{definition}")
+            raise DefinitionUnidentifiedError(
+                f"Unable to identify definition type for: {definition}"
+            )
 
     def _create_type_hint_and_caster(  # noqa: C901
         self, definition: Dict, definition_name: str = None
@@ -189,8 +203,8 @@ class DefinitionRegistry:
         This method analyzes a schema definition to determine the appropriate Python type and
         the function required to cast or convert JSON data into instances of that type. It handles
         various schema configurations including references to other definitions (`$ref`),
-        combinations of definitions (`allOf` for multi-inheritance, `oneOf` for unions or polymorphism),
-        and direct mappings to native Python types.
+        combinations of definitions (`allOf` for multi-inheritance, `allOf` with conditions for polymorphism,
+        `oneOf` or `anyOf` for unions), and direct mappings to native Python types.
 
         Args:
             definition (Dict): The schema definition to analyze.
@@ -223,6 +237,23 @@ class DefinitionRegistry:
                 ref_caster = self._casters[ref_name]
                 return ref_type_hint, ref_caster
         elif "allOf" in definition:
+            if any("if" in cond and "then" in cond for cond in definition["allOf"]):
+                union_type_hints = []
+                for allof_definition in definition["allOf"]:
+                    then_definition = allof_definition["then"]
+                    then_definition_type = self.identify_definition_type(
+                        then_definition
+                    )
+                    if then_definition_type == "passthrough":
+                        ref_name = then_definition["$ref"].split("/")[-1]
+                        union_type_hints.append(self._type_hints[ref_name])
+                    else:
+                        raise DefinitionUnidentifiedError(
+                            f"{then_definition} not supported for polymorph definitions"
+                        )
+                polymorph_factory = PolymorphFactory(self, definition)
+                type_hint = Union[tuple(union_type_hints)]
+                return type_hint, polymorph_factory.discriminate
             parent_classes = []
             undefined_class_count = 0
             for parent_definition in definition["allOf"]:
@@ -251,23 +282,19 @@ class DefinitionRegistry:
                     )
             MultiinheritanceClass = type(definition_name, tuple(parent_classes), {})
             return MultiinheritanceClass, MultiinheritanceClass.from_dict
-        elif "oneOf" in definition:
+        elif "oneOf" in definition or "anyOf" in definition:
             union_type_hints = []
-            for oneof_definition in definition["oneOf"]:
+            for oneof_definition in definition.get("oneOf", definition.get("anyOf")):
                 oneof_definition_type = self.identify_definition_type(oneof_definition)
                 if oneof_definition_type == "passthrough":
                     ref_name = oneof_definition["$ref"].split("/")[-1]
                     union_type_hints.append(self._type_hints[ref_name])
                 else:
                     raise DefinitionUnidentifiedError(
-                        f"{oneof_definition} not supported for `oneOf` definitions"
+                        f"{oneof_definition} not supported for `oneOf` of `anyOf` definitions"
                     )
             type_hint = Union[tuple(union_type_hints)]
-            if "discriminator" in definition:
-                polymorph_factory = PolymorphFactory(self, definition)
-                return type_hint, polymorph_factory.discriminate
-            else:
-                return type_hint, lambda x: x
+            return type_hint, lambda x: x
         elif (def_type := definition.get("type")) in native_type_mapping:
             if def_type == "object":
                 if definition_name in self._type_hints:
@@ -303,7 +330,7 @@ class DefinitionRegistry:
             format = native_format_mapping.get(definition.get("format"))
             python_type = format if format is not None else python_type
             type_hint = python_type
-            caster = dateutil.parser.parse if python_type == datetime else python_type
+            caster = dateutil_parser.parse if python_type == datetime else python_type
             return type_hint, caster
         else:
             raise DefinitionUnidentifiedError(f"{definition}")

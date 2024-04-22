@@ -14,6 +14,6 @@ def load_schema() -> Dict:
     # ).open("r") as f:
     #     return json.load(f)
 
-    with open("../examples/schema.json") as f:
+    with open("/home/stuartncook/code/tadatakit/examples/json_schema.json") as f:
         schema = json.load(f)
     return schema
