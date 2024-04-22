@@ -11,6 +11,7 @@ def simple_schema():
         "title": "SimpleSchema",
         "type": "object",
         "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+        "required": ["name"],
     }
 
 
@@ -22,19 +23,20 @@ def complex_schema():
         "$defs": {
             "Person": {
                 "type": "object",
-                "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+                "properties": {"Name": {"type": "string"}, "Age": {"type": "integer"}},
+                "required": ["Name"],
             },
             "Employee": {
                 "allOf": [
                     {"$ref": "#/$defs/Person"},
                     {
                         "type": "object",
-                        "properties": {"employeeId": {"type": "string"}},
+                        "properties": {"EmployeeId": {"type": "string"}},
                     },
                 ]
             },
         },
-        "properties": {"employee": {"$ref": "#/$defs/Employee"}},
+        "properties": {"Employee": {"$ref": "#/$defs/Employee"}},
     }
 
 
@@ -103,3 +105,18 @@ def test_handling_of_additional_properties(simple_schema):
     registry = DefinitionRegistry(simple_schema)
     registry.add_properties_to_custom_types()
     assert registry._type_hints["SimpleSchema"]._kwargs_property is not None
+
+
+def test_multiinheritance_class_initialization(complex_schema):
+    registry = DefinitionRegistry(complex_schema)
+    Employee = registry._type_hints["Employee"]
+    employee_instance = Employee(name="John Doe", age=30, employee_id="E12345")
+    assert employee_instance.name == "John Doe"
+    assert employee_instance.age == 30
+    assert employee_instance.employee_id == "E12345"
+
+
+def test_parsing_nested_structures(complex_schema):
+    registry = DefinitionRegistry(complex_schema)
+    assert registry._type_hints["Person"]
+    assert registry._type_hints["Employee"]
