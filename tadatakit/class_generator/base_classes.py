@@ -303,7 +303,6 @@ class SchemaObject:
             inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
         ]
         doc_string = cls._doc_string_base
-        annotations = {}
         added_properties = {}
 
         for supercls in cls.__mro__[1:-2]:
@@ -312,21 +311,28 @@ class SchemaObject:
                     param_kind = inspect.Parameter.POSITIONAL_OR_KEYWORD
                     parameters.append(
                         inspect.Parameter(
-                            name, param_kind, default=property_details["default"]
+                            name,
+                            param_kind,
+                            default=property_details["default"],
+                            annotation=property_details["type_hint"],
                         )
                     )
-                    annotations[name] = property_details["type_hint"]
                     type_hint_str = type_hint_to_str(property_details["type_hint"])
                     doc_string += f"\n    {name} ({type_hint_str})"
                 added_properties.update(supercls._added_properties)
 
         for supercls in cls.__mro__[1:-2]:
-            if supercls._kwargs_property is not None:
-                annotations["kwargs"] = supercls._kwargs_property["type_hint"]
+            if supercls._kwargs_property is not None and "kwargs" not in [
+                p.name for p in parameters
+            ]:
                 type_hint_str = type_hint_to_str(supercls._kwargs_property["type_hint"])
                 doc_string += f"\n    **kwargs: Dict[str, {type_hint_str}] (optional)"
                 parameters.append(
-                    inspect.Parameter("kwargs", inspect.Parameter.VAR_KEYWORD)
+                    inspect.Parameter(
+                        "kwargs",
+                        inspect.Parameter.VAR_KEYWORD,
+                        annotation=supercls._kwargs_property["type_hint"],
+                    ),
                 )
                 cls._kwargs_property = supercls._kwargs_property
 
@@ -337,8 +343,8 @@ class SchemaObject:
         def replacement_init_function(self, *args, **kwargs):
             bound_args = new_sig.bind(self, *args, **kwargs)
             bound_args.apply_defaults()
-            super_kwargs = {}
             for supercls in cls.__mro__[1:-2]:
+                super_kwargs = {}
                 super_params = inspect.signature(supercls.__init__).parameters
                 for name, value in bound_args.arguments.items():
                     if name != "self" and name != "kwargs" and name in super_params:
@@ -348,7 +354,6 @@ class SchemaObject:
                         super_kwargs[name] = value
                 supercls.__init__(self, **super_kwargs)
 
-        replacement_init_function.__annotations__ = annotations
         cls.__init__ = replacement_init_function
         cls.__init__.__signature__ = new_sig
         cls.__init__.__doc__ = doc_string
