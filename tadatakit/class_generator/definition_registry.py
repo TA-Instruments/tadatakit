@@ -494,5 +494,6 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for definition_name in self._definition_groups["custom"]:
-            globals_dict[definition_name] = self._type_hints[definition_name]
+        for category in ["custom", "passthrough", "multi-inheritance"]:
+            for definition_name in self._definition_groups[category]:
+                globals_dict[definition_name] = self._type_hints[definition_name]
