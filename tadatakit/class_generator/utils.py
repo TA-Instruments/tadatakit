@@ -2,6 +2,7 @@ from typing import Type, Any, get_origin, get_args, Union, Dict, Tuple
 from types import FunctionType
 import re
 import datetime
+import uuid
 
 
 def type_hint_to_str(type_hint: Type) -> str:
@@ -116,6 +117,8 @@ def json_serializer(obj: Any) -> str:
     """
     if isinstance(obj, datetime.datetime):
         return obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    elif isinstance(obj, uuid.UUID):
+        return str(obj)
     raise TypeError("Type %s not serializable" % type(obj))
 
 
