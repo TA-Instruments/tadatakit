@@ -5,7 +5,12 @@ from collections import defaultdict
 from datetime import datetime
 from dateutil import parser as dateutil_parser
 
-from .base_classes import native_type_mapping, native_format_mapping, SchemaObject
+from .base_classes import (
+    native_type_mapping,
+    native_format_mapping,
+    native_pattern_mapping,
+    SchemaObject,
+)
 from .polymorph_factory import PolymorphFactory
 from .utils import pascal_to_snake, split_props_by_required
 
@@ -328,7 +333,14 @@ class DefinitionRegistry:
                 return List[item_type_hint], lambda x: [item_caster(a) for a in x]
             python_type = native_type_mapping[def_type]
             format = native_format_mapping.get(definition.get("format"))
-            python_type = format if format is not None else python_type
+            pattern = native_pattern_mapping.get(definition.get("pattern"))
+            python_type = (
+                format
+                if format is not None
+                else pattern
+                if pattern is not None
+                else python_type
+            )
             type_hint = python_type
             caster = dateutil_parser.parse if python_type == datetime else python_type
             return type_hint, caster

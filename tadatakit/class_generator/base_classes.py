@@ -26,9 +26,12 @@ native_type_mapping = {
 }
 
 native_format_mapping = {
-    "date-time": datetime,
-    "uuid": UUID,
     "byte": bytes,  # For base64 encoded data
+}
+
+native_pattern_mapping = {
+    "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(Z|\\.[0-9]+Z)$": datetime,
+    "^[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}$": UUID,
 }
 
 
