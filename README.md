@@ -2,6 +2,10 @@
 
 TA Data Kit is a Python library developed by [TA Instruments](https://www.tainstruments.com/), designed for efficient parsing and handling of data exported by [TRIOS :tm: JSON Export](https://www.tainstruments.com/).
 
+## Examples
+
+If you would like to jump to some usage examples head over to our [collection of Jupyter Notebooks](examples/examples.md) showing everything from data reading, plotting, analysis, data conversion and more.
+
 ## Installation
 
 ...
