@@ -28,7 +28,7 @@ def create_dataframe(
     column_names: Dict[str, str] = {}
 
     for col, details in self.results.column_headers.to_dict().items():
-        column_dtypes[col] = "float64" if details["ValueType"] == "Float" else "object"
+        column_dtypes[col] = "float64" if details["ValueType"] == "Number" else "object"
         unit_dict = details.get("Unit")
         unit_name = unit_dict["Name"] if unit_dict else None
         column_names[col] = details["DisplayName"]
