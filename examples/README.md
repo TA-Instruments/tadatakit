@@ -1,5 +1,5 @@
 # Examples
-> [Return to README.md](../README.md)
+> [Return to main README](../README.md)
 
 ## The Basics
 1. [Introduction to the schema](intro_to_the_schema.ipynb)
