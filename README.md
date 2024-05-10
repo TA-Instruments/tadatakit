@@ -4,7 +4,7 @@ TA Data Kit is a Python library developed by [TA Instruments](https://www.tainst
 
 ## Examples
 
-If you would like to jump to some usage examples head over to our [collection of Jupyter Notebooks](examples/examples.md) showing everything from data reading, plotting, analysis, data conversion and more.
+If you would like to jump to some usage examples head over to our [collection of Jupyter Notebooks](examples/README.md) showing everything from data reading, plotting, analysis, data conversion and more.
 
 ## Installation
 
