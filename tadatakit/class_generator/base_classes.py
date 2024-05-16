@@ -1,3 +1,4 @@
+from abc import ABC
 from datetime import datetime
 from dateutil import parser as dateutil_parser
 from uuid import UUID
@@ -35,7 +36,7 @@ native_pattern_mapping = {
 }
 
 
-class SchemaObject:
+class SchemaObject(ABC):
     """
     Base class for dynamically generated schema objects from schema definitions.
 
