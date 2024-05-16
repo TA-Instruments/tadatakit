@@ -63,7 +63,7 @@ class DefinitionRegistry:
                 }
             }
         )
-        self.initialise_definitions()
+        self.initialize_definitions()
 
     @classmethod
     def from_json(
@@ -95,7 +95,7 @@ class DefinitionRegistry:
 
         return cls(schema)
 
-    def initialise_definitions(self):
+    def initialize_definitions(self):
         """
         Initializes and categorises schema definitions from the loaded schema.
 
