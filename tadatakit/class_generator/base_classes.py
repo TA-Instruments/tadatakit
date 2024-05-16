@@ -114,8 +114,9 @@ class SchemaObject(ABC):
         """
         super().__init_subclass__(**kwargs)
         cls._added_properties = {}
+        cls._special_names_set = set()
         cls._doc_string_base = (
-            f"Initialise a TA Instruments `{cls.__name__}` object.\n\nArgs:"
+            f"Initialize a TA Instruments `{cls.__name__}` object.\n\nArgs:"
         )
         cls._kwargs_property = None
         cls._update_init()
@@ -407,7 +408,9 @@ class SchemaObject(ABC):
             TypeError: If a required property is missing or if there is a type mismatch, indicating that the
                        dictionary does not perfectly align with the class's expected attributes.
         """
-        data_dict = {pascal_to_snake(k): v for k, v in data_dict.items()}
+        data_dict = {
+            pascal_to_snake(k, cls._special_names_set): v for k, v in data_dict.items()
+        }
         try:
             return cls(**data_dict)
         except TypeError as e:
@@ -431,13 +434,17 @@ class SchemaObject(ABC):
         result = {}
         for prop_name, value in self.__dict__.items():
             if isinstance(value, SchemaObject):
-                result[snake_to_pascal(prop_name)] = value.to_dict()
+                result[
+                    snake_to_pascal(prop_name, self._special_names_set)
+                ] = value.to_dict()
             elif (
                 isinstance(value, list) and value and isinstance(value[0], SchemaObject)
             ):
-                result[snake_to_pascal(prop_name)] = [item.to_dict() for item in value]
+                result[snake_to_pascal(prop_name, self._special_names_set)] = [
+                    item.to_dict() for item in value
+                ]
             else:
-                result[snake_to_pascal(prop_name)] = value
+                result[snake_to_pascal(prop_name, self._special_names_set)] = value
         return result
 
     def to_json(self, path_or_file: Union[str, os.PathLike, TextIO]) -> None:

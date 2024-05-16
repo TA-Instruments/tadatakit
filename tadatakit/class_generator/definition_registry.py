@@ -343,13 +343,10 @@ class DefinitionRegistry:
             python_type = native_type_mapping[def_type]
             format = native_format_mapping.get(definition.get("format"))
             pattern = native_pattern_mapping.get(definition.get("pattern"))
-            python_type = (
-                format
-                if format is not None
-                else pattern
-                if pattern is not None
-                else python_type
-            )
+            if format is not None:
+                python_type = format
+            elif pattern is not None:
+                python_type = pattern
             type_hint = python_type
             caster = dateutil_parser.parse if python_type == datetime else python_type
             return type_hint, caster
@@ -402,7 +399,7 @@ class DefinitionRegistry:
                 prop_def_type = self._identify_definition_type(property_definition)
                 if prop_def_type == CUSTOM:
                     prop_class_name = (
-                        f"{definition_name}_{pascal_to_snake(property_name)}"
+                        f"{definition_name}_{pascal_to_snake(property_name, set())}"
                     )
                     prop_type_hint = type(prop_class_name, (SchemaObject,), {})
                     self._definitions[prop_class_name] = property_definition
@@ -438,13 +435,17 @@ class DefinitionRegistry:
                 type_hint, caster = self._create_type_hint_and_caster(
                     prop_definition, f"{definition_name}_{prop_name}"
                 )
-                cls._add_property(pascal_to_snake(prop_name), caster, type_hint)
+                cls._add_property(
+                    pascal_to_snake(prop_name, cls._special_names_set),
+                    caster,
+                    type_hint,
+                )
             for prop_name, prop_definition in non_required_props.items():
                 type_hint, caster = self._create_type_hint_and_caster(
                     prop_definition, f"{definition_name}_{prop_name}"
                 )
                 cls._add_property(
-                    pascal_to_snake(prop_name),
+                    pascal_to_snake(prop_name, cls._special_names_set),
                     caster,
                     Optional[type_hint],
                     default=None,
@@ -474,7 +475,6 @@ class DefinitionRegistry:
         """
         for definition_name in self._definition_groups[PASSTHROUGH]:
             cls = self._type_hints[definition_name]
-            print(cls.__name__)
             parent_class = cls.mro()[1]
             cls.__init__ = parent_class.__init__
             cls._added_properties = parent_class._added_properties
