@@ -50,6 +50,8 @@ from tadatakit.classes import Experiment
 experiment = Experiment.from_json("<path/to/json_file.json>")
 ```
 
+As files can be large, be aware that this can take a large amount of memory.
+
 ### Using The Data
 
 `Experiment` includes a convenience function to return the results data as a [pandas](https://pandas.pydata.org/) DataFrame. The example below demonstrates parsing a file and utilizing the DataFrame:
