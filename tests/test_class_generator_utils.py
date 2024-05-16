@@ -52,14 +52,14 @@ def test_is_instance_raises_type_error():
     "pascal, snake", [("PascalCase", "pascal_case"), ("TestCase", "test_case")]
 )
 def test_pascal_to_snake(pascal, snake):
-    assert pascal_to_snake(pascal) == snake
+    assert pascal_to_snake(pascal, set()) == snake
 
 
 @pytest.mark.parametrize(
     "snake, pascal", [("snake_case", "SnakeCase"), ("test_case", "TestCase")]
 )
 def test_snake_to_pascal(snake, pascal):
-    assert snake_to_pascal(snake) == pascal
+    assert snake_to_pascal(snake, set()) == pascal
 
 
 def test_json_serializer_datetime():
@@ -89,7 +89,7 @@ def test_split_props_by_required():
 
 
 def create_complex_function():
-    x = 10  # Closure variable
+    x = 10
 
     def complex_function(a, b: int = 5, *args, **kwargs) -> str:
         """

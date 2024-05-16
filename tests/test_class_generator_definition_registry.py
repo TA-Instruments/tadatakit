@@ -78,7 +78,7 @@ def test_error_in_schema_parsing(invalid_schema):
 
 def test_identify_definition_type_with_ref(complex_schema):
     registry = DefinitionRegistry(complex_schema)
-    employee_type = registry.identify_definition_type(
+    employee_type = registry._identify_definition_type(
         complex_schema["$defs"]["Employee"]
     )
     assert employee_type == "multi-inheritance"
@@ -86,15 +86,15 @@ def test_identify_definition_type_with_ref(complex_schema):
 
 def test_add_types_by_group(complex_schema):
     registry = DefinitionRegistry(complex_schema)
-    registry.add_types_by_group("multi-inheritance")
+    registry._add_types_by_group("multi-inheritance")
     assert "Employee" in registry._type_hints
     assert callable(registry._casters["Employee"])
 
 
 def test_property_addition_to_custom_types(complex_schema):
     registry = DefinitionRegistry(complex_schema)
-    registry.add_custom_types_from_props()
-    registry.add_properties_to_custom_types()
+    registry._add_custom_types_from_props()
+    registry._add_properties_to_custom_types()
     employee_class = registry._type_hints["Employee"]
     assert "employee_id" in employee_class.__init__.__signature__.parameters
 
@@ -103,7 +103,7 @@ def test_handling_of_additional_properties(simple_schema):
     # Modifying schema to add additionalProperties
     simple_schema["additionalProperties"] = {"type": "string"}
     registry = DefinitionRegistry(simple_schema)
-    registry.add_properties_to_custom_types()
+    registry._add_properties_to_custom_types()
     assert registry._type_hints["SimpleSchema"]._kwargs_property is not None
 
 
