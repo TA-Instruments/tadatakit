@@ -14,6 +14,15 @@ from .base_classes import (
 from .polymorph_factory import PolymorphFactory
 from .utils import pascal_to_snake, split_props_by_required
 
+# named constants for definition types
+NATIVE = "native"
+CUSTOM = "custom"
+PASSTHROUGH = "passthrough"
+MULTIINHERITANCE = "multi-inheritance"
+LIST = "list"
+UNION = "union"
+POLYMORPH = "polymorph"
+
 
 class DefinitionUnidentifiedError(Exception):
     """Custom exception for when schema definition cannot be identified."""
@@ -116,13 +125,13 @@ class DefinitionRegistry:
         self._group_schema_by_definition_type()
         # add them in order
         for definition_type in [
-            "native",
-            "custom",
-            "passthrough",
-            "multi-inheritance",
-            "list",
-            "union",
-            "polymorph",
+            NATIVE,
+            CUSTOM,
+            PASSTHROUGH,
+            MULTIINHERITANCE,
+            LIST,
+            UNION,
+            POLYMORPH,
         ]:
             self._add_types_by_group(definition_type)
         self._add_custom_types_from_props()
@@ -176,24 +185,24 @@ class DefinitionRegistry:
                                          required elements to determine its type.
         """
         if "$ref" in definition:
-            return "passthrough"
+            return PASSTHROUGH
         elif "allOf" in definition:
             if all(
                 "if" in condition and "then" in condition
                 for condition in definition["allOf"]
             ):
-                return "polymorph"
+                return POLYMORPH
             else:
-                return "multi-inheritance"
+                return MULTIINHERITANCE
         elif "oneOf" in definition or "anyOf" in definition:
-            return "union"
+            return UNION
         elif (def_type := definition.get("type")) in native_type_mapping:
             if def_type == "object":
-                return "custom"
+                return CUSTOM
             elif def_type == "array":
-                return "list"
+                return LIST
             else:
-                return "native"
+                return NATIVE
         else:
             raise DefinitionUnidentifiedError(
                 f"Unable to identify definition type for: {definition}"
@@ -249,7 +258,7 @@ class DefinitionRegistry:
                     then_definition_type = self._identify_definition_type(
                         then_definition
                     )
-                    if then_definition_type == "passthrough":
+                    if then_definition_type == PASSTHROUGH:
                         ref_name = then_definition["$ref"].split("/")[-1]
                         union_type_hints.append(self._type_hints[ref_name])
                     else:
@@ -265,11 +274,11 @@ class DefinitionRegistry:
                 parent_definition_type = self._identify_definition_type(
                     parent_definition
                 )
-                if parent_definition_type == "passthrough":
+                if parent_definition_type == PASSTHROUGH:
                     ref_name = parent_definition["$ref"].split("/")[-1]
                     ParentClass = self._type_hints[ref_name]
                     parent_classes.append(ParentClass)
-                elif parent_definition_type == "custom":
+                elif parent_definition_type == CUSTOM:
                     new_parent_class_name = (
                         f"{definition_name}_Parent{undefined_class_count}"
                     )
@@ -277,8 +286,8 @@ class DefinitionRegistry:
                     self._definitions[new_parent_class_name] = parent_definition
                     self._type_hints[new_parent_class_name] = stub_class
                     self._casters[new_parent_class_name] = stub_class
-                    self._definition_identities[new_parent_class_name] = "custom"
-                    self._definition_groups["custom"].append(new_parent_class_name)
+                    self._definition_identities[new_parent_class_name] = CUSTOM
+                    self._definition_groups[CUSTOM].append(new_parent_class_name)
                     parent_classes.append(stub_class)
                 else:
                     raise DefinitionUnidentifiedError(
@@ -291,7 +300,7 @@ class DefinitionRegistry:
             union_type_hints = []
             for oneof_definition in definition.get("oneOf", definition.get("anyOf")):
                 oneof_definition_type = self._identify_definition_type(oneof_definition)
-                if oneof_definition_type == "passthrough":
+                if oneof_definition_type == PASSTHROUGH:
                     ref_name = oneof_definition["$ref"].split("/")[-1]
                     union_type_hints.append(self._type_hints[ref_name])
                 else:
@@ -311,25 +320,25 @@ class DefinitionRegistry:
                     self._definitions[definition_name] = definition
                     self._type_hints[definition_name] = type_hint
                     self._casters[definition_name] = caster
-                    self._definition_identities[definition_name] = "custom"
-                    self._definition_groups["custom"].append(definition_name)
+                    self._definition_identities[definition_name] = CUSTOM
+                    self._definition_groups[CUSTOM].append(definition_name)
                 return type_hint, caster
             elif def_type == "array":
                 item_definition = definition["items"]
                 item_definition_type = self._identify_definition_type(item_definition)
-                if item_definition_type == "passthrough":
+                if item_definition_type == PASSTHROUGH:
                     ref_name = item_definition["$ref"].split("/")[-1]
                     item_type_hint = self._type_hints[ref_name]
                     item_caster = self._casters[ref_name]
-                elif item_definition_type == "custom":
+                elif item_definition_type == CUSTOM:
                     item_class_name = f"{definition_name}_Item"
                     item_type_hint = type(item_class_name, (SchemaObject,), {})
                     item_caster = item_type_hint.from_dict
                     self._definitions[item_class_name] = item_definition
                     self._type_hints[item_class_name] = item_type_hint
                     self._casters[item_class_name] = item_caster
-                    self._definition_identities[item_class_name] = "custom"
-                    self._definition_groups["custom"].append(item_class_name)
+                    self._definition_identities[item_class_name] = CUSTOM
+                    self._definition_groups[CUSTOM].append(item_class_name)
                 return List[item_type_hint], lambda x: [item_caster(a) for a in x]
             python_type = native_type_mapping[def_type]
             format = native_format_mapping.get(definition.get("format"))
@@ -385,13 +394,13 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for definition_name in self._definition_groups["custom"]:
+        for definition_name in self._definition_groups[CUSTOM]:
             definition = self._definitions[definition_name]
             for property_name, property_definition in definition.get(
                 "properties", {}
             ).items():
                 prop_def_type = self._identify_definition_type(property_definition)
-                if prop_def_type == "custom":
+                if prop_def_type == CUSTOM:
                     prop_class_name = (
                         f"{definition_name}_{pascal_to_snake(property_name)}"
                     )
@@ -399,8 +408,8 @@ class DefinitionRegistry:
                     self._definitions[prop_class_name] = property_definition
                     self._type_hints[prop_class_name] = prop_type_hint
                     self._casters[prop_class_name] = prop_type_hint
-                    self._definition_identities[prop_class_name] = "custom"
-                    self._definition_groups["custom"].append(prop_class_name)
+                    self._definition_identities[prop_class_name] = CUSTOM
+                    self._definition_groups[CUSTOM].append(prop_class_name)
 
     def _add_properties_to_custom_types(self):
         """
@@ -421,7 +430,7 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for definition_name in self._definition_groups["custom"]:
+        for definition_name in self._definition_groups[CUSTOM]:
             definition = self._definitions[definition_name]
             cls = self._type_hints[definition_name]
             required_props, non_required_props = split_props_by_required(definition)
@@ -463,7 +472,7 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for definition_name in self._definition_groups["passthrough"]:
+        for definition_name in self._definition_groups[PASSTHROUGH]:
             cls = self._type_hints[definition_name]
             print(cls.__name__)
             parent_class = cls.mro()[1]
@@ -487,7 +496,7 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for definition_name in self._definition_groups["multi-inheritance"]:
+        for definition_name in self._definition_groups[MULTIINHERITANCE]:
             cls = self._type_hints[definition_name]
             cls._combine_multiinheritance_inits()
 
@@ -506,6 +515,6 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for category in ["custom", "passthrough", "multi-inheritance"]:
+        for category in [CUSTOM, PASSTHROUGH, MULTIINHERITANCE]:
             for definition_name in self._definition_groups[category]:
                 globals_dict[definition_name] = self._type_hints[definition_name]
