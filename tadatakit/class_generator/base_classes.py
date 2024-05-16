@@ -421,6 +421,9 @@ class SchemaObject(ABC):
         into a dictionary format, following the naming conventions required by the schema. This allows the object
         to be easily serialized into JSON or another dictionary-based format.
 
+        Note that it does not discriminate between properties defined in the schema and any that are dynamically added
+        afterwards. This method does not therefore guarantee that the output conforms to the schema.
+
         Returns:
             Dict[str, Any]: A dictionary representation of the SchemaObject instance, with property names converted
                             to PascalCase to align with the schema.
@@ -443,6 +446,9 @@ class SchemaObject(ABC):
 
         This method saves the dictionary representation of the SchemaObject instance to a JSON file
         or a file-like object.
+
+        Note that it does not discriminate between properties defined in the schema and any that are dynamically added
+        afterwards. This method does not therefore guarantee that the output conforms to the schema.
 
         Args:
             path_or_file (Union[str, os.PathLike, TextIO]): The file path or file-like object where the JSON
