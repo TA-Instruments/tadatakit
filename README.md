@@ -1,6 +1,6 @@
 # TA Data Kit (tadatakit)
 
-TA Data Kit is a Python library developed by [TA Instruments](https://www.tainstruments.com/), designed for efficient parsing and handling of data exported by [TRIOS :tm: JSON Export](https://www.tainstruments.com/).
+TA Data Kit is a Python library developed by [TA Instruments](https://www.tainstruments.com/), designed for easy parsing and handling of data exported by [TRIOS :tm: JSON Export](https://www.tainstruments.com/).
 
 ## Examples
 
@@ -101,7 +101,7 @@ for step, df in zip(step, dfs):
 
 ### 3. Building Custom Extensions
 
-Create custom functionalities by adding new methods or altering existing behaviors, perhaps to add polars support, an analysis pipeline, or methods for injection into databases or LIMS systems:
+Create custom functionality by adding new methods or altering existing behaviors, perhaps to add polars support, an analysis pipeline, or methods for injection into databases or LIMS systems:
 
 **Steps to Extend:**
 
@@ -129,7 +129,7 @@ print(experiment.time_since_experiment())
 The `tadatakit.class_generator` module within the TA Data Kit automates the creation of Python classes directly from the TA Instruments TRIOS :tm: JSON Export Schema. This process allows for dynamic and efficient handling of data that conforms to defined standards, enhancing both development speed and data integrity. Here’s how the library achieves this:
 
 ### Overview
-The library converts a JSON schema provided in an OpenAPI specification into fully functional Python classes. These classes include type hints, serialization methods, and custom behaviors, closely mirroring the structure and requirements laid out in the schema.
+The library converts a JSON schema provided in a specification file into fully functional Python classes. These classes include type hints, serialization methods, and custom behaviors, closely mirroring the structure and requirements laid out in the schema.
 
 ### Steps for Class Generation
 #### 1. Schema Loading
@@ -142,7 +142,7 @@ The loaded schema is parsed to identify different data structures and types. Thi
 For each definition in the schema (representing a potential data model), a Python class is dynamically generated. The library maps JSON types to Python types (e.g., `integer` to `int`, `object` to custom classes) and integrates any constraints and nested structures as class attributes.
 
 #### 4. Property Handling
-Each class is equipped with properties based on the schema's definitions. Properties are added dynamically with appropriate getters, setters, and deletions to manage data access and ensure type safety.
+Each class is equipped with properties based on the schema's definitions. Properties are added dynamically with appropriate getters, setters, and deletions to manage data access and ensure type safety. In some places, for example results data, the schema allows for `additionalProperties` which are treated as `kwargs` in Python.
 
 #### 5. Method Integration
 Serialization and deserialization methods such as `from_json`, `to_json`, `from_dict`, and `to_dict` are integrated into each class. These methods handle conversion between JSON strings, dictionaries, and class instances, facilitating easy data exchange and storage operations.
@@ -155,6 +155,6 @@ Generated classes are registered in a global class registry within the library. 
 
 ## Contributing
 
-We welcome contributions from the community and are pleased to have you join us in improving `tadatakit`. Whether you are fixing bugs, adding new features, improving documentation, or suggesting new functionalities, your input is valuable!
+We welcome contributions from the community and are pleased to have you join us in improving `tadatakit`. Whether you are fixing bugs, adding new features, improving documentation, or suggesting new functionality, your input is valuable!
 
 If you are interested in contributing to the `tadatakit` library, please read our [contributing guidelines](CONTRIBUTING.md) for detailed information on how to get started, coding conventions, and the pull request process.
