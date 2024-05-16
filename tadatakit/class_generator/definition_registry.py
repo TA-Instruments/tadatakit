@@ -63,7 +63,7 @@ class DefinitionRegistry:
                 }
             }
         )
-        self.initialize_definitions()
+        self._initialize_definitions()
 
     @classmethod
     def from_json(
@@ -95,7 +95,7 @@ class DefinitionRegistry:
 
         return cls(schema)
 
-    def initialize_definitions(self):
+    def _initialize_definitions(self):
         """
         Initializes and categorises schema definitions from the loaded schema.
 
@@ -113,7 +113,7 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        self.group_schema_by_definition_type()
+        self._group_schema_by_definition_type()
         # add them in order
         for definition_type in [
             "native",
@@ -124,11 +124,11 @@ class DefinitionRegistry:
             "union",
             "polymorph",
         ]:
-            self.add_types_by_group(definition_type)
-        self.add_custom_types_from_props()
-        self.add_properties_to_custom_types()
+            self._add_types_by_group(definition_type)
+        self._add_custom_types_from_props()
+        self._add_properties_to_custom_types()
 
-    def group_schema_by_definition_type(self):
+    def _group_schema_by_definition_type(self):
         """
         Groups schema definitions by their identified type categories.
 
@@ -145,13 +145,13 @@ class DefinitionRegistry:
             None
         """
         self._definition_identities = {
-            k: self.identify_definition_type(v) for k, v in self._definitions.items()
+            k: self._identify_definition_type(v) for k, v in self._definitions.items()
         }
         self._definition_groups = defaultdict(list)
         for key, value in self._definition_identities.items():
             self._definition_groups[value].append(key)
 
-    def identify_definition_type(self, definition: Dict[str, Any]):
+    def _identify_definition_type(self, definition: Dict[str, Any]):
         """
         Identifies the type category of a given schema definition based on its structure and content.
 
@@ -246,7 +246,7 @@ class DefinitionRegistry:
                 union_type_hints = []
                 for allof_definition in definition["allOf"]:
                     then_definition = allof_definition["then"]
-                    then_definition_type = self.identify_definition_type(
+                    then_definition_type = self._identify_definition_type(
                         then_definition
                     )
                     if then_definition_type == "passthrough":
@@ -262,7 +262,7 @@ class DefinitionRegistry:
             parent_classes = []
             undefined_class_count = 0
             for parent_definition in definition["allOf"]:
-                parent_definition_type = self.identify_definition_type(
+                parent_definition_type = self._identify_definition_type(
                     parent_definition
                 )
                 if parent_definition_type == "passthrough":
@@ -290,7 +290,7 @@ class DefinitionRegistry:
         elif "oneOf" in definition or "anyOf" in definition:
             union_type_hints = []
             for oneof_definition in definition.get("oneOf", definition.get("anyOf")):
-                oneof_definition_type = self.identify_definition_type(oneof_definition)
+                oneof_definition_type = self._identify_definition_type(oneof_definition)
                 if oneof_definition_type == "passthrough":
                     ref_name = oneof_definition["$ref"].split("/")[-1]
                     union_type_hints.append(self._type_hints[ref_name])
@@ -316,7 +316,7 @@ class DefinitionRegistry:
                 return type_hint, caster
             elif def_type == "array":
                 item_definition = definition["items"]
-                item_definition_type = self.identify_definition_type(item_definition)
+                item_definition_type = self._identify_definition_type(item_definition)
                 if item_definition_type == "passthrough":
                     ref_name = item_definition["$ref"].split("/")[-1]
                     item_type_hint = self._type_hints[ref_name]
@@ -347,7 +347,7 @@ class DefinitionRegistry:
         else:
             raise DefinitionUnidentifiedError(f"{definition}")
 
-    def add_types_by_group(self, definition_type: str):
+    def _add_types_by_group(self, definition_type: str):
         """
         Processes and registers type hints and casters for all definitions in a specific category.
 
@@ -370,7 +370,7 @@ class DefinitionRegistry:
             self._type_hints[definition_name] = type_hint
             self._casters[definition_name] = caster
 
-    def add_custom_types_from_props(self):
+    def _add_custom_types_from_props(self):
         """
         Registers new custom types derived from the properties of existing custom definitions.
 
@@ -390,7 +390,7 @@ class DefinitionRegistry:
             for property_name, property_definition in definition.get(
                 "properties", {}
             ).items():
-                prop_def_type = self.identify_definition_type(property_definition)
+                prop_def_type = self._identify_definition_type(property_definition)
                 if prop_def_type == "custom":
                     prop_class_name = (
                         f"{definition_name}_{pascal_to_snake(property_name)}"
@@ -402,7 +402,7 @@ class DefinitionRegistry:
                     self._definition_identities[prop_class_name] = "custom"
                     self._definition_groups["custom"].append(prop_class_name)
 
-    def add_properties_to_custom_types(self):
+    def _add_properties_to_custom_types(self):
         """
         Adds properties to custom types defined in the schema, distinguishing between required and optional properties.
 
@@ -445,9 +445,9 @@ class DefinitionRegistry:
                     definition.get("additionalProperties")
                 )
                 cls._add_additional_properties(caster, type_hint)
-        self.combine_inits_in_multiinheritance()
+        self._combine_inits_in_multiinheritance()
 
-    def replace_init_in_passthrough_classes(self):
+    def _replace_init_in_passthrough_classes(self):
         """
         Updates the initialization methods for classes designated as passthrough to directly use their parent's __init__.
 
@@ -471,7 +471,7 @@ class DefinitionRegistry:
             cls._added_properties = parent_class._added_properties
             cls._kwargs_property = parent_class._kwargs_property
 
-    def combine_inits_in_multiinheritance(self):
+    def _combine_inits_in_multiinheritance(self):
         """
         Integrates initialization methods from multiple parent classes for classes defined with multi-inheritance.
 
