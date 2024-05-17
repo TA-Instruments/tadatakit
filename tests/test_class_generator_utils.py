@@ -23,7 +23,7 @@ from tadatakit.class_generator.utils import (
         (Union[str, int], "Union[str, int]"),
     ],
 )
-def test_type_hint_to_str(type_hint, expected):
+def test__type_hint_to_str__convert_type_hint_to_string(type_hint, expected):
     assert type_hint_to_str(type_hint) == expected
 
 
@@ -39,11 +39,11 @@ def test_type_hint_to_str(type_hint, expected):
         (123, str, False),
     ],
 )
-def test_is_instance(obj, type_hint, expected):
+def test__is_instance__validate_object_against_type_hint(obj, type_hint, expected):
     assert is_instance(obj, type_hint) == expected
 
 
-def test_is_instance_raises_type_error():
+def test__is_instance__raise_type_error__when_type_hint_is_invalid():
     with pytest.raises(TypeError):
         is_instance(123, "not_a_type")
 
@@ -51,33 +51,33 @@ def test_is_instance_raises_type_error():
 @pytest.mark.parametrize(
     "pascal, snake", [("PascalCase", "pascal_case"), ("TestCase", "test_case")]
 )
-def test_pascal_to_snake(pascal, snake):
+def test__pascal_to_snake__convert_pascal_case_to_snake_case(pascal, snake):
     assert pascal_to_snake(pascal, set()) == snake
 
 
 @pytest.mark.parametrize(
     "snake, pascal", [("snake_case", "SnakeCase"), ("test_case", "TestCase")]
 )
-def test_snake_to_pascal(snake, pascal):
+def test__snake_to_pascal__convert_snake_case_to_pascal_case(snake, pascal):
     assert snake_to_pascal(snake, set()) == pascal
 
 
-def test_json_serializer_datetime():
+def test__json_serializer__serialize_datetime():
     dt = datetime(2020, 1, 1, 12, 0)
     assert json_serializer(dt) == "2020-01-01T12:00:00.000000Z"
 
 
-def test_json_serializer_uuid():
+def test__json_serializer__serialize_uuid():
     uid = UUID("12345678123456781234567812345678")
     assert json_serializer(uid) == "12345678-1234-5678-1234-567812345678"
 
 
-def test_json_serializer_raises():
+def test__json_serializer__raise_error__when_unsupported_type():
     with pytest.raises(TypeError):
         json_serializer(1.23)
 
 
-def test_split_props_by_required():
+def test__split_props_by_required__separate_required_and_non_required_properties():
     definition = {
         "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
         "required": ["name"],
@@ -100,7 +100,7 @@ def create_complex_function():
     return complex_function
 
 
-def test_copy_complex_function():
+def test__copy_function__copy_complex_function():
     original_function = create_complex_function()
     copied_function = copy_function(original_function)
     assert copied_function is not original_function

@@ -51,12 +51,14 @@ def invalid_schema():
     }
 
 
-def test_initialization_with_simple_schema(simple_schema):
+def test__init__include_simple_schema__when_provided_with_simple_schema(simple_schema):
     registry = DefinitionRegistry(simple_schema)
     assert "SimpleSchema" in registry._type_hints
 
 
-def test_initialization_from_json_file(mocker, simple_schema):
+def test__from_json__initialize_registry__when_json_file_is_valid(
+    mocker, simple_schema
+):
     mocker.patch("json.load", return_value=simple_schema)
     mocker.patch("builtins.open", mocker.mock_open())
 
@@ -64,19 +66,21 @@ def test_initialization_from_json_file(mocker, simple_schema):
     assert "SimpleSchema" in registry._type_hints
 
 
-def test_error_handling_for_invalid_file(mocker):
+def test__from_json__raise_error__when_file_is_invalid(mocker):
     mocker.patch("builtins.open", side_effect=IOError)
 
     with pytest.raises(IOError):
         DefinitionRegistry.from_json("path/to/nonexistent/file.json")
 
 
-def test_error_in_schema_parsing(invalid_schema):
+def test__init__raise_error__when_schema_is_invalid(invalid_schema):
     with pytest.raises(DefinitionUnidentifiedError):
         DefinitionRegistry(invalid_schema)
 
 
-def test_identify_definition_type_with_ref(complex_schema):
+def test__identify_definition_type__return_multi_inheritance__when_schema_contains_ref(
+    complex_schema,
+):
     registry = DefinitionRegistry(complex_schema)
     employee_type = registry._identify_definition_type(
         complex_schema["$defs"]["Employee"]
@@ -84,14 +88,18 @@ def test_identify_definition_type_with_ref(complex_schema):
     assert employee_type == "multi-inheritance"
 
 
-def test_add_types_by_group(complex_schema):
+def test__add_types_by_group__include_employee__when_group_is_multi_inheritance(
+    complex_schema,
+):
     registry = DefinitionRegistry(complex_schema)
     registry._add_types_by_group("multi-inheritance")
     assert "Employee" in registry._type_hints
     assert callable(registry._casters["Employee"])
 
 
-def test_property_addition_to_custom_types(complex_schema):
+def test__add_properties_to_custom_types__include_specific_property__when_called_on_custom_types(
+    complex_schema,
+):
     registry = DefinitionRegistry(complex_schema)
     registry._add_custom_types_from_props()
     registry._add_properties_to_custom_types()
@@ -99,7 +107,9 @@ def test_property_addition_to_custom_types(complex_schema):
     assert "employee_id" in employee_class.__init__.__signature__.parameters
 
 
-def test_handling_of_additional_properties(simple_schema):
+def test__add_properties_to_custom_types__handle_additional_properties__when_schema_has_additional_properties(
+    simple_schema,
+):
     # Modifying schema to add additionalProperties
     simple_schema["additionalProperties"] = {"type": "string"}
     registry = DefinitionRegistry(simple_schema)
@@ -107,7 +117,9 @@ def test_handling_of_additional_properties(simple_schema):
     assert registry._type_hints["SimpleSchema"]._kwargs_property is not None
 
 
-def test_multiinheritance_class_initialization(complex_schema):
+def test__SchemaObject_init__create_instance_and_populate_properties__when_schema_is_multi_inheritance(
+    complex_schema,
+):
     registry = DefinitionRegistry(complex_schema)
     Employee = registry._type_hints["Employee"]
     employee_instance = Employee(name="John Doe", age=30, employee_id="E12345")
@@ -116,7 +128,7 @@ def test_multiinheritance_class_initialization(complex_schema):
     assert employee_instance.employee_id == "E12345"
 
 
-def test_parsing_nested_structures(complex_schema):
+def test__parse__identify_nested_structures(complex_schema):
     registry = DefinitionRegistry(complex_schema)
     assert registry._type_hints["Person"]
     assert registry._type_hints["Employee"]

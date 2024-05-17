@@ -29,29 +29,39 @@ def conditions_schema():
     }
 
 
-def test_initialization_with_valid_conditions(mock_registry, conditions_schema):
+def test__PolymorphFactory_init__create_conditions__when_provided_with_valid_conditions(
+    mock_registry, conditions_schema
+):
     factory = PolymorphFactory(mock_registry, conditions_schema)
     assert len(factory.conditions) == 2
 
 
-def test_initialization_failure_with_missing_conditions(mock_registry):
+def test__PolymorphFactory_init__raise_error__when_conditions_are_missing(
+    mock_registry,
+):
     with pytest.raises(KeyError):
         PolymorphFactory(mock_registry, {})
 
 
-def test_discriminate_matches_first_condition(mock_registry, conditions_schema):
+def test__discriminate__return_correct_instance__when_first_condition(
+    mock_registry, conditions_schema
+):
     factory = PolymorphFactory(mock_registry, conditions_schema)
     result = factory.discriminate({"role": "employee"})
     assert result == "Employee instance created"
 
 
-def test_discriminate_matches_second_condition(mock_registry, conditions_schema):
+def test__discriminate__return_correct_instance__when_second_condition(
+    mock_registry, conditions_schema
+):
     factory = PolymorphFactory(mock_registry, conditions_schema)
     result = factory.discriminate({"role": "manager"})
     assert result == "Manager instance created"
 
 
-def test_discriminate_no_match_raises_error(mock_registry, conditions_schema):
+def test__discriminate__raise_error__when_no_condition_matches(
+    mock_registry, conditions_schema
+):
     factory = PolymorphFactory(mock_registry, conditions_schema)
     with pytest.raises(ValueError) as exc_info:
         factory.discriminate({"role": "intern"})
