@@ -23,7 +23,7 @@ from tadatakit.class_generator.utils import (
         (Union[str, int], "Union[str, int]"),
     ],
 )
-def test__type_hint_to_str__convert_type_hint_to_string(type_hint, expected):
+def test__type_hint_to_str__must_convert_type_hint_to_string(type_hint, expected):
     assert type_hint_to_str(type_hint) == expected
 
 
@@ -39,11 +39,11 @@ def test__type_hint_to_str__convert_type_hint_to_string(type_hint, expected):
         (123, str, False),
     ],
 )
-def test__is_instance__validate_object_against_type_hint(obj, type_hint, expected):
+def test__is_instance__must_validate_object_against_type_hint(obj, type_hint, expected):
     assert is_instance(obj, type_hint) == expected
 
 
-def test__is_instance__raise_type_error__when_type_hint_is_invalid():
+def test__is_instance__must_raise_type_error__when_type_hint_is_invalid():
     with pytest.raises(TypeError):
         is_instance(123, "not_a_type")
 
@@ -51,23 +51,23 @@ def test__is_instance__raise_type_error__when_type_hint_is_invalid():
 @pytest.mark.parametrize(
     "pascal, snake", [("PascalCase", "pascal_case"), ("TestCase", "test_case")]
 )
-def test__pascal_to_snake__convert_pascal_case_to_snake_case(pascal, snake):
+def test__pascal_to_snake__must_convert_pascal_case_to_snake_case(pascal, snake):
     assert pascal_to_snake(pascal, set()) == snake
 
 
 @pytest.mark.parametrize(
     "snake, pascal", [("snake_case", "SnakeCase"), ("test_case", "TestCase")]
 )
-def test__snake_to_pascal__convert_snake_case_to_pascal_case(snake, pascal):
+def test__snake_to_pascal__must_convert_snake_case_to_pascal_case(snake, pascal):
     assert snake_to_pascal(snake, set()) == pascal
 
 
-def test__convert_non_json_serializable_types__serialize_datetime():
+def test__convert_non_json_serializable_types__must_serialize_datetime():
     dt = datetime(2020, 1, 1, 12, 0)
     assert convert_non_json_serializable_types(dt) == "2020-01-01T12:00:00.000000Z"
 
 
-def test__json_serializer__serialize_uuid():
+def test__convert_non_json_serializable_types__must_serialize_uuid():
     uid = UUID("12345678123456781234567812345678")
     assert (
         convert_non_json_serializable_types(uid)
@@ -75,12 +75,12 @@ def test__json_serializer__serialize_uuid():
     )
 
 
-def test__json_serializer__raise_error__when_unsupported_type():
+def test__json_serializer__must_raise_error__when_unsupported_type():
     with pytest.raises(TypeError):
         convert_non_json_serializable_types(1.23)
 
 
-def test__split_props_by_required__separate_required_and_non_required_properties():
+def test__split_props_by_required__must_separate_required_and_non_required_properties():
     definition = {
         "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
         "required": ["name"],
@@ -103,7 +103,7 @@ def create_complex_function():
     return complex_function
 
 
-def test__copy_function__copy_complex_function():
+def test__copy_function__must_copy_complex_function():
     original_function = create_complex_function()
     copied_function = copy_function(original_function)
     assert copied_function is not original_function
