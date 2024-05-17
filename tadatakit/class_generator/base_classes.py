@@ -1,7 +1,6 @@
 from abc import ABC
 from datetime import datetime
 from dateutil import parser as dateutil_parser
-from uuid import UUID
 from typing import Any, Type, Union, TextIO, Dict
 import inspect
 from functools import wraps
@@ -24,11 +23,6 @@ native_type_mapping = {
     "boolean": bool,
     "array": list,
     "object": dict,
-}
-
-native_pattern_mapping = {
-    "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(Z|\\.[0-9]+Z)$": datetime,
-    "^[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}$": UUID,
 }
 
 

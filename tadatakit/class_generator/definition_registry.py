@@ -4,10 +4,10 @@ import json
 from collections import defaultdict
 from datetime import datetime
 from dateutil import parser as dateutil_parser
+from uuid import UUID
 
 from .base_classes import (
     native_type_mapping,
-    native_pattern_mapping,
     SchemaObject,
 )
 from .polymorph_factory import PolymorphFactory
@@ -62,6 +62,7 @@ class DefinitionRegistry:
         self._type_hints = {}
         self._casters = {}
         self._definitions = schema.get("$defs", {})
+        self._generate_native_pattern_mapping()
         self._definitions.update(
             {
                 schema["title"]: {
@@ -72,6 +73,12 @@ class DefinitionRegistry:
             }
         )
         self._initialize_definitions()
+
+    def _generate_native_pattern_mapping(self):
+        self._native_pattern_mapping = {
+            self._definitions["DateTime"]["pattern"]: datetime,
+            self._definitions["Uuid"]["pattern"]: UUID,
+        }
 
     @classmethod
     def from_json(
@@ -344,7 +351,7 @@ class DefinitionRegistry:
                     )
                 return List[item_type_hint], lambda x: [item_caster(a) for a in x]
             python_type = native_type_mapping[def_type]
-            pattern = native_pattern_mapping.get(definition.get("pattern"))
+            pattern = self._native_pattern_mapping.get(definition.get("pattern"))
             if pattern is not None:
                 python_type = pattern
             type_hint = python_type
