@@ -75,10 +75,13 @@ class DefinitionRegistry:
         self._initialize_definitions()
 
     def _generate_native_pattern_mapping(self):
-        self._native_pattern_mapping = {
-            self._definitions["DateTime"]["pattern"]: datetime,
-            self._definitions["Uuid"]["pattern"]: UUID,
-        }
+        self._native_pattern_mapping = dict()
+        if "DateTime" in self._definitions:
+            self._native_pattern_mapping[
+                self._definitions["DateTime"]["pattern"]
+            ] = datetime
+        if "Uuid" in self._definitions:
+            self._native_pattern_mapping[self._definitions["Uuid"]["pattern"]] = UUID
 
     @classmethod
     def from_json(
