@@ -126,6 +126,8 @@ experiment = Experiment.from_json('data.json')
 print(experiment.time_since_experiment())
 ```
 
+> Note: we provide no guarantee that your functions will not conflict with future additions to the schema. For example, if you add a dynamic property of `Experiment.end_time` it may conflict in the future with an `EndTime` property in the schema.
+
 ## Explanation Of Approach
 
 The `tadatakit.class_generator` module within the TA Data Kit automates the creation of Python classes directly from the TA Instruments TRIOS :tm: JSON Export Schema. This process allows for dynamic and efficient handling of data that conforms to defined standards, enhancing both development speed and data integrity. Here’s how the library achieves this:
