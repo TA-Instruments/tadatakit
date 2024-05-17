@@ -7,7 +7,6 @@ from dateutil import parser as dateutil_parser
 
 from .base_classes import (
     native_type_mapping,
-    native_format_mapping,
     native_pattern_mapping,
     SchemaObject,
 )
@@ -341,11 +340,8 @@ class DefinitionRegistry:
                     self._definition_groups[CUSTOM].append(item_class_name)
                 return List[item_type_hint], lambda x: [item_caster(a) for a in x]
             python_type = native_type_mapping[def_type]
-            format = native_format_mapping.get(definition.get("format"))
             pattern = native_pattern_mapping.get(definition.get("pattern"))
-            if format is not None:
-                python_type = format
-            elif pattern is not None:
+            if pattern is not None:
                 python_type = pattern
             type_hint = python_type
             caster = dateutil_parser.parse if python_type == datetime else python_type
