@@ -338,6 +338,10 @@ class DefinitionRegistry:
                     self._casters[item_class_name] = item_caster
                     self._definition_identities[item_class_name] = CUSTOM
                     self._definition_groups[CUSTOM].append(item_class_name)
+                else:
+                    raise DefinitionUnidentifiedError(
+                        f"Item type: `{item_definition_type}` not supported for an array"
+                    )
                 return List[item_type_hint], lambda x: [item_caster(a) for a in x]
             python_type = native_type_mapping[def_type]
             pattern = native_pattern_mapping.get(definition.get("pattern"))
