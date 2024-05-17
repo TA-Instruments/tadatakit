@@ -101,7 +101,7 @@ def snake_to_pascal(name: str, special_names_set: set) -> str:
     return "".join(x.title() for x in name.split("_"))
 
 
-def json_serializer(obj: Any) -> str:
+def convert_non_json_serializable_types(obj: Any) -> str:
     """
     JSON serializer for objects not serializable by default json code.
 

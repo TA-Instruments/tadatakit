@@ -8,7 +8,7 @@ from tadatakit.class_generator.utils import (
     is_instance,
     pascal_to_snake,
     snake_to_pascal,
-    json_serializer,
+    convert_non_json_serializable_types,
     split_props_by_required,
     copy_function,
 )
@@ -62,19 +62,22 @@ def test__snake_to_pascal__convert_snake_case_to_pascal_case(snake, pascal):
     assert snake_to_pascal(snake, set()) == pascal
 
 
-def test__json_serializer__serialize_datetime():
+def test__convert_non_json_serializable_types__serialize_datetime():
     dt = datetime(2020, 1, 1, 12, 0)
-    assert json_serializer(dt) == "2020-01-01T12:00:00.000000Z"
+    assert convert_non_json_serializable_types(dt) == "2020-01-01T12:00:00.000000Z"
 
 
 def test__json_serializer__serialize_uuid():
     uid = UUID("12345678123456781234567812345678")
-    assert json_serializer(uid) == "12345678-1234-5678-1234-567812345678"
+    assert (
+        convert_non_json_serializable_types(uid)
+        == "12345678-1234-5678-1234-567812345678"
+    )
 
 
 def test__json_serializer__raise_error__when_unsupported_type():
     with pytest.raises(TypeError):
-        json_serializer(1.23)
+        convert_non_json_serializable_types(1.23)
 
 
 def test__split_props_by_required__separate_required_and_non_required_properties():

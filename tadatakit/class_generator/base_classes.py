@@ -13,7 +13,7 @@ from .utils import (
     is_instance,
     snake_to_pascal,
     pascal_to_snake,
-    json_serializer,
+    convert_non_json_serializable_types,
     copy_function,
 )
 
@@ -473,6 +473,16 @@ class SchemaObject(ABC):
         """
         if isinstance(path_or_file, (str, os.PathLike)):
             with open(path_or_file, "w") as file:
-                json.dump(self.to_dict(), file, indent=2, default=json_serializer)
+                json.dump(
+                    self.to_dict(),
+                    file,
+                    indent=2,
+                    default=convert_non_json_serializable_types,
+                )
         else:
-            json.dump(self.to_dict(), path_or_file, indent=2, default=json_serializer)
+            json.dump(
+                self.to_dict(),
+                path_or_file,
+                indent=2,
+                default=convert_non_json_serializable_types,
+            )
