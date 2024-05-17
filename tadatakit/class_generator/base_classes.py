@@ -364,6 +364,8 @@ class SchemaObject(ABC):
         """
         Creates an instance of the class by reading from a JSON file or file-like object.
 
+        Note that this can take a long time for very large files.
+
         Args:
             path_or_file (Union[str, os.PathLike, TextIO]): The path to a JSON file or a file-like object
                                                             that can be read from.
@@ -392,6 +394,8 @@ class SchemaObject(ABC):
         It converts dictionary keys to the appropriate snake_case format expected by the class' attributes,
         if necessary, and then attempts to create an instance by passing the processed dictionary as keyword
         arguments to the class constructor.
+
+        Note that this can take a long time for very large dictionaries.
 
         Args:
             data_dict (Dict): The dictionary containing data with which to instantiate the object. Keys should
