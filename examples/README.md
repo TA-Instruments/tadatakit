@@ -12,3 +12,6 @@
 
 ## Thermogravimetric Analysis (TGA)
 1. [TGA Weight Loss](tga_weight_loss.ipynb)
+
+## Simultaneous DSC/TGA (SDT)
+1. [Auto-Analysis of SDT Data](sdt_enthalpy.ipynb)
