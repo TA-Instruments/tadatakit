@@ -358,7 +358,7 @@ class SchemaObject(ABC):
         """
         Creates an instance of the class by reading from a JSON file or file-like object.
 
-        Note that this can take a long time for very large files.
+        Note that the file is loaded entirely into memory, and files can be large.
 
         Args:
             path_or_file (Union[str, os.PathLike, TextIO]): The path to a JSON file or a file-like object
