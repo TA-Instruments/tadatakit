@@ -39,12 +39,19 @@ def create_dataframe(
         [row.__dict__ for row in self.results.rows[start_index:end_index]]
     )
     df = df.astype({c: column_dtypes[c] for c in df.columns})
+
+    def uuid_converter(x):
+        if isinstance(x, str):
+            return UUID(x)
+        else:
+            return None
+
     for uuid_column in [
         k
         for k, v in self.results.column_headers.to_dict().items()
         if v["ValueType"] == "Uuid"
     ]:
-        df[uuid_column] = df[uuid_column].apply(UUID)
+        df[uuid_column] = df[uuid_column].apply(uuid_converter)
     return df.rename(columns=column_names)
 
 
