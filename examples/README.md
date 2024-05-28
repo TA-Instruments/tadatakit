@@ -15,3 +15,6 @@
 
 ## Simultaneous DSC/TGA (SDT)
 1. [Auto-Analysis of SDT Data](sdt_enthalpy.ipynb)
+
+## Rheology
+1. [Crossover Point Determination](rheology_crossover.ipynb)
