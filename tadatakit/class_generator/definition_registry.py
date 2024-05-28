@@ -540,6 +540,6 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for category in [CUSTOM, PASSTHROUGH, MULTIINHERITANCE]:
+        for category in [ENUM, CUSTOM, PASSTHROUGH, MULTIINHERITANCE]:
             for definition_name in self._definition_groups[category]:
                 globals_dict[definition_name] = self._type_hints[definition_name]
