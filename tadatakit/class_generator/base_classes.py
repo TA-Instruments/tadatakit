@@ -6,6 +6,7 @@ import inspect
 from functools import wraps
 import json
 import os
+from enum import Enum
 
 from .utils import (
     type_hint_to_str,
@@ -427,7 +428,7 @@ class SchemaObject(ABC):
         """
         result = {}
         for prop_name, value in self.__dict__.items():
-            if isinstance(value, SchemaObject):
+            if isinstance(value, SchemaObject) or isinstance(value, IdDescriptionEnum):
                 result[
                     snake_to_pascal(prop_name, self._special_names_set)
                 ] = value.to_dict()
@@ -480,3 +481,19 @@ class SchemaObject(ABC):
                 indent=2,
                 default=convert_non_json_serializable_types,
             )
+
+
+class IdDescriptionEnum(Enum):
+    def __init__(self, id, description):
+        self.id = id
+        self.description = description
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        for member in cls:
+            if member.id == data_dict["Id"]:
+                return member
+        raise ValueError("No matching {cls.__name__} enum found")
+
+    def to_dict(self):
+        return {"Id": self.id, "Description": self.description}
