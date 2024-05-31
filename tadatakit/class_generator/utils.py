@@ -1,4 +1,4 @@
-from typing import Type, Any, get_origin, get_args, Union, Dict, Tuple
+from typing import Type, Any, get_origin, get_args, Union, Dict, Tuple, Optional
 from types import FunctionType
 import re
 import datetime
@@ -94,6 +94,62 @@ def snake_to_pascal(name: str, special_names_set: set) -> str:
     Returns:
         str: The converted PascalCase string, or the original string if it is not a valid identifier.
     """
+    if not name.isidentifier():
+        return name
+    elif name in special_names_set:
+        return name
+    return "".join(x.title() for x in name.split("_"))
+
+
+def pascal_to_screaming_snake(
+    name: str, special_names_set: Optional[set] = None
+) -> str:
+    """
+    Converts a PascalCase string to a SCREAMING_SNAKE_CASE string.
+
+    This function takes a string formatted in PascalCase and converts it to SCREAMING_SNAKE_CASE.
+    It handles compound words by inserting underscores between words, where each word starts
+    with a capital letter in the original string. If the input string is not a valid identifier,
+    it returns the string unchanged.
+
+    Args:
+        name (str): The PascalCase string to convert.
+        special_names_set (Optional[set]): a set of special names which should not be converted
+
+    Returns:
+        str: The converted SCREAMING_SNAKE_CASE string, or the original string if it is not a
+             valid identifier.
+    """
+    if special_names_set is None:
+        special_names_set = set()
+    if not name.isidentifier():
+        return name
+    elif "_" in name:
+        special_names_set.add(name)
+        return name
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).upper()
+
+
+def screaming_snake_to_pascal(
+    name: str, special_names_set: Optional[set] = None
+) -> str:
+    """
+    Converts a SCREAMING_SNAKE_CASE string to a PascalCase string.
+
+    This function takes a string formatted in SCREAMING_SNAKE_CASE and converts it to PascalCase by
+    capitalizing the first letter of each word and removing underscores. If the input string
+    is not a valid identifier, it returns the string unchanged.
+
+    Args:
+        name (str): The SCREAMING_SNAKE_CASE string to convert.
+        special_names_set (Optional[set]): a set of special names which should not be converted
+
+    Returns:
+        str: The converted PascalCase string, or the original string if it is not a valid identifier.
+    """
+    if special_names_set is None:
+        special_names_set = set()
     if not name.isidentifier():
         return name
     elif name in special_names_set:

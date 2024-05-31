@@ -1,12 +1,23 @@
 import pandas as pd
-from typing import Dict, Optional
+from typing import Dict, Optional, Literal
 from uuid import UUID
+import warnings
 
-from tadatakit.class_generator import Experiment
+from tadatakit.class_generator import Experiment, DataSetClassificationType
+
+
+class DataProvenanceWarning(UserWarning):
+    pass
+
+
+warnings.simplefilter("once", DataProvenanceWarning)
 
 
 def create_dataframe(
-    self: Experiment, start_index: Optional[int] = None, end_index: Optional[int] = None
+    self: Experiment,
+    section: Literal["original", "processed"] = "original",
+    start_index: Optional[int] = None,
+    end_index: Optional[int] = None,
 ) -> pd.DataFrame:
     """
     Generates a pandas DataFrame from a slice of the results within this Experiment instance.
@@ -15,6 +26,7 @@ def create_dataframe(
     further analysis or visualization. It optionally slices the results using provided indices.
 
     Args:
+        section (Literal["original", "processed"]): The name of the section to retrieve.
         start_index (Optional[int]): The starting index for slicing the results. Defaults to None, which
                                      starts from the first result.
         end_index (Optional[int]): The ending index for slicing the results. Defaults to None, which
@@ -24,10 +36,17 @@ def create_dataframe(
         pd.DataFrame: A DataFrame representation of the Experiment's results, with appropriate
                       data types and units applied to the columns.
     """
+    try:
+        results = getattr(self.results, section)
+    except AttributeError as e:
+        raise ValueError(
+            f"Section '{section}' does not exist in the Experiment instance."
+        ) from e
+
     column_dtypes: Dict[str, str] = {}
     column_names: Dict[str, str] = {}
 
-    for col, details in self.results.column_headers.to_dict().items():
+    for col, details in results.column_headers.to_dict().items():
         column_dtypes[col] = "float64" if details["ValueType"] == "Number" else "object"
         unit_dict = details.get("Unit")
         unit_name = unit_dict["Name"] if unit_dict else None
@@ -35,9 +54,7 @@ def create_dataframe(
         if unit_name is not None:
             column_names[col] += f" / {unit_name}"
 
-    df = pd.DataFrame(
-        [row.__dict__ for row in self.results.rows[start_index:end_index]]
-    )
+    df = pd.DataFrame([row.__dict__ for row in results.rows[start_index:end_index]])
     df = df.astype({c: column_dtypes[c] for c in df.columns})
 
     def uuid_converter(x):
@@ -48,24 +65,43 @@ def create_dataframe(
 
     for uuid_column in [
         k
-        for k, v in self.results.column_headers.to_dict().items()
+        for k, v in results.column_headers.to_dict().items()
         if v["ValueType"] == "Uuid"
     ]:
         df[uuid_column] = df[uuid_column].apply(uuid_converter)
+
+    if (
+        section == "original"
+        and results.classification is not DataSetClassificationType.UNMODIFIED
+    ):
+        warnings.warn(
+            f'The {section} data for this experiment is classified as "{results.classification.description}"',
+            DataProvenanceWarning,
+            stacklevel=2,
+        )
     return df.rename(columns=column_names)
 
 
-def get_dataframe(self: Experiment) -> pd.DataFrame:
+def get_dataframe(
+    self: Experiment,
+    section: Literal["original", "processed"] = "original",
+) -> pd.DataFrame:
     """
     Retrieves a DataFrame containing all results from the Experiment.
+
+    Args:
+        section (Literal["original", "processed"]): The name of the section to retrieve.
 
     Returns:
         pd.DataFrame: A DataFrame containing all results of the Experiment.
     """
-    return create_dataframe(self, None, None)
+    return create_dataframe(self, section, None, None)
 
 
-def get_dataframes_by_step(self: Experiment) -> Dict[str, pd.DataFrame]:
+def get_dataframes_by_step(
+    self: Experiment,
+    section: Literal["original", "processed"] = "original",
+) -> Dict[str, pd.DataFrame]:
     """
     Generates a dictionary of pandas DataFrames, each representing the results of a
     specific step in the Experiment.
@@ -73,11 +109,14 @@ def get_dataframes_by_step(self: Experiment) -> Dict[str, pd.DataFrame]:
     This method organizes the experiment results into separate DataFrames for each step
     based on the "Procedure Step Id".
 
+    Args:
+        section (Literal["original", "processed"]): The name of the section to retrieve.
+
     Returns:
         Dict[str, pd.DataFrame]: A dictionary where the keys are step names and the values are DataFrames
                                  containing the results for each respective step.
     """
-    df = self.get_dataframe()
+    df = self.get_dataframe(section)
     df_dict = {k: v for k, v in df.groupby("Procedure Step Id")}
     steps = [step.name for step in self.procedure.steps]
     return steps, [

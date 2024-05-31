@@ -5,13 +5,11 @@ from collections import defaultdict
 from datetime import datetime
 from dateutil import parser as dateutil_parser
 from uuid import UUID
+from enum import Enum
 
-from .base_classes import (
-    native_type_mapping,
-    SchemaObject,
-)
+from .base_classes import native_type_mapping, SchemaObject, IdDescriptionEnum
 from .polymorph_factory import PolymorphFactory
-from .utils import pascal_to_snake, split_props_by_required
+from .utils import pascal_to_snake, split_props_by_required, pascal_to_screaming_snake
 
 # named constants for definition types
 NATIVE = "native"
@@ -21,6 +19,7 @@ MULTIINHERITANCE = "multi-inheritance"
 LIST = "list"
 UNION = "union"
 POLYMORPH = "polymorph"
+ENUM = "enum"
 
 
 class DefinitionUnidentifiedError(Exception):
@@ -135,6 +134,7 @@ class DefinitionRegistry:
         # add them in order
         for definition_type in [
             NATIVE,
+            ENUM,
             CUSTOM,
             PASSTHROUGH,
             MULTIINHERITANCE,
@@ -212,6 +212,8 @@ class DefinitionRegistry:
                 return LIST
             else:
                 return NATIVE
+        elif "enum" in definition:
+            return ENUM
         else:
             raise DefinitionUnidentifiedError(
                 f"Unable to identify definition type for: {definition}"
@@ -360,6 +362,19 @@ class DefinitionRegistry:
             type_hint = python_type
             caster = dateutil_parser.parse if python_type == datetime else python_type
             return type_hint, caster
+        elif "enum" in definition:
+            enum_class = Enum(
+                "Classification",
+                {
+                    pascal_to_screaming_snake(member["Id"]): (
+                        member["Id"],
+                        member["Description"],
+                    )
+                    for member in definition["enum"]
+                },
+                type=IdDescriptionEnum,
+            )
+            return enum_class, enum_class.from_dict
         else:
             raise DefinitionUnidentifiedError(f"{definition}")
 
@@ -525,6 +540,6 @@ class DefinitionRegistry:
         Returns:
             None
         """
-        for category in [CUSTOM, PASSTHROUGH, MULTIINHERITANCE]:
+        for category in [ENUM, CUSTOM, PASSTHROUGH, MULTIINHERITANCE]:
             for definition_name in self._definition_groups[category]:
                 globals_dict[definition_name] = self._type_hints[definition_name]

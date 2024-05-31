@@ -3,8 +3,9 @@ import json
 from datetime import datetime
 from uuid import UUID
 from io import StringIO
+from enum import Enum
 
-from tadatakit.class_generator.base_classes import SchemaObject
+from tadatakit.class_generator.base_classes import SchemaObject, IdDescriptionEnum
 
 
 @pytest.fixture
@@ -96,3 +97,65 @@ def test__from_json__must_create_instance_from_json(dynamic_schema_class, schema
     instance = dynamic_schema_class.from_json(buffer)
     assert instance.string_property == "test"
     assert instance.integer_property == 42
+
+
+@pytest.fixture
+def sample_enum():
+    return Enum(
+        "SampleEnum",
+        {
+            "EXTERNAL_FILE_FORMAT": (
+                "ExternalFileFormat",
+                "Data sourced from an external file",
+            ),
+            "TRANSFORMED": (
+                "Transformed",
+                "Data resulting from a transformation where the source data may not be fully original",
+            ),
+            "NO_PROVENANCE_AVAILABLE": (
+                "NoProvenanceAvailable",
+                "Data sourced from an old version of TRIOS with no record of provenance",
+            ),
+            "UNMODIFIED": ("Unmodified", "Data from the original experiment"),
+            "LATEST": (
+                "Latest",
+                "Data may include user edits from transformation, visualization, and analysis",
+            ),
+        },
+        type=IdDescriptionEnum,
+    )
+
+
+def test__from_dict__must_create_enum_member_from_dict(sample_enum):
+    data_dict = {
+        "Id": "Latest",
+        "Description": "Data may include user edits from transformation, visualization, and analysis",
+    }
+    member = sample_enum.from_dict(data_dict)
+    assert member == sample_enum.LATEST
+    assert member.id == "Latest"
+    assert (
+        member.description
+        == "Data may include user edits from transformation, visualization, and analysis"
+    )
+
+
+def test__to_dict__must_convert_enum_member_to_dict(sample_enum):
+    member = sample_enum.LATEST
+    result = member.to_dict()
+    assert result == {
+        "Id": "Latest",
+        "Description": "Data may include user edits from transformation, visualization, and analysis",
+    }
+
+
+def test__from_dict__must_raise_error_when_no_matching_enum_found(sample_enum):
+    data_dict = {"Id": "Unknown", "Description": "Some description"}
+    with pytest.raises(ValueError):
+        sample_enum.from_dict(data_dict)
+
+
+def test__enum_members__must_have_correct_attributes(sample_enum):
+    member = sample_enum.UNMODIFIED
+    assert member.id == "Unmodified"
+    assert member.description == "Data from the original experiment"

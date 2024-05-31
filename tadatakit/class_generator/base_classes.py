@@ -6,6 +6,7 @@ import inspect
 from functools import wraps
 import json
 import os
+from enum import Enum
 
 from .utils import (
     type_hint_to_str,
@@ -427,7 +428,7 @@ class SchemaObject(ABC):
         """
         result = {}
         for prop_name, value in self.__dict__.items():
-            if isinstance(value, SchemaObject):
+            if isinstance(value, SchemaObject) or isinstance(value, IdDescriptionEnum):
                 result[
                     snake_to_pascal(prop_name, self._special_names_set)
                 ] = value.to_dict()
@@ -480,3 +481,55 @@ class SchemaObject(ABC):
                 indent=2,
                 default=convert_non_json_serializable_types,
             )
+
+
+class IdDescriptionEnum(Enum):
+    """
+    An enumeration class for items with an ID and a description.
+
+    Each member of this enum has an ID and a description. This class
+    provides methods to convert between dictionaries and enum members.
+
+    Attributes:
+        id (str): The unique identifier for the enum member.
+        description (str): A descriptive text for the enum member.
+    """
+
+    def __init__(self, id, description):
+        """
+        Initializes an enum member with an ID and a description.
+
+        Args:
+            id (str): The unique identifier for the enum member.
+            description (str): A descriptive text for the enum member.
+        """
+        self.id = id
+        self.description = description
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        """
+        Creates an enum member from a dictionary.
+
+        Args:
+            data_dict (dict): A dictionary with keys 'Id' and 'Description'.
+
+        Returns:
+            IdDescriptionEnum: The matching enum member.
+
+        Raises:
+            ValueError: If no matching enum member is found.
+        """
+        for member in cls:
+            if member.id == data_dict["Id"]:
+                return member
+        raise ValueError("No matching {cls.__name__} enum found")
+
+    def to_dict(self):
+        """
+        Converts the enum member to a dictionary.
+
+        Returns:
+            dict: A dictionary with keys 'Id' and 'Description' representing the enum member.
+        """
+        return {"Id": self.id, "Description": self.description}
