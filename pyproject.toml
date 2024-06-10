@@ -7,11 +7,11 @@ authors = ["Stuart Cook <stuart_cook@waters.com>"]
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 pandas = "^2.1.4"
-pytest-mock = "^3.14.0"
 tainstruments-triosdataschema = "0.1.17"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.0"
+pytest-mock = "^3.14.0"
 pre-commit = "^3.5.0"
 black = "^23.11.0"
 flake8 = "^6.1.0"
