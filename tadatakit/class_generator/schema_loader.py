@@ -5,7 +5,7 @@ from importlib import resources
 
 def load_schema() -> Dict:
     """
-    Load and return the JSON schema from the `tainstrumentstriosdataschema` package.
+    Load and return the JSON schema from the `tainstruments_triosdataschema` package.
 
     Returns:
         Dict: The loaded JSON schema as a dictionary.
