@@ -1,5 +1,6 @@
 import json
 from typing import Dict
+from importlib import resources
 
 
 def load_schema() -> Dict:
@@ -9,11 +10,7 @@ def load_schema() -> Dict:
     Returns:
         Dict: The loaded JSON schema as a dictionary.
     """
-    # with resources.files("tainstrumentstriosdataschema").joinpath(
-    #     "TriosDataSchema.json"
-    # ).open("r") as f:
-    #     return json.load(f)
-
-    with open("/home/stuartncook/code/tadatakit/examples/json_schema.json") as f:
-        schema = json.load(f)
-    return schema
+    with resources.files("tainstruments_triosdataschema").joinpath(
+        "TRIOSJSONExportSchema.json"
+    ).open("r") as f:
+        return json.load(f)
