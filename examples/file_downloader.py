@@ -43,7 +43,7 @@ def download_files(filenames: Union[List[str], str], target_directory: str = "fi
         >>> download_files('file1.txt', target_directory='downloads')
         Downloaded downloads/file1.txt (1.02 KB)
     """
-    base_url = "<some url>"
+    base_url = "https://software.tainstruments.com/example_files/"
 
     # Ensure the target directory exists
     if not os.path.exists(target_directory):
