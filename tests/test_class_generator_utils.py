@@ -66,7 +66,12 @@ def test__snake_to_pascal__must_convert_snake_case_to_pascal_case(snake, pascal)
 
 @pytest.mark.parametrize(
     "pascal, screaming_snake",
-    [("PascalCase", "PASCAL_CASE"), ("TestCase", "TEST_CASE")],
+    [
+        ("PascalCase", "PASCAL_CASE"),
+        ("TestCase", "TEST_CASE"),
+        ("Test", "TEST"),
+        ("", ""),
+    ],
 )
 def test__pascal_to_screaming_snake__must_convert_pascal_case_to_screaming_snake_case(
     pascal, screaming_snake
@@ -76,7 +81,12 @@ def test__pascal_to_screaming_snake__must_convert_pascal_case_to_screaming_snake
 
 @pytest.mark.parametrize(
     "screaming_snake, pascal",
-    [("SCREAMING_SNAKE_CASE", "ScreamingSnakeCase"), ("TEST_CASE", "TestCase")],
+    [
+        ("SCREAMING_SNAKE_CASE", "ScreamingSnakeCase"),
+        ("TEST_CASE", "TestCase"),
+        ("TEST", "Test"),
+        ("", ""),
+    ],
 )
 def test__screaming_snake_to_pascal__must_convert_snake_case_to_pascal_case(
     screaming_snake, pascal
