@@ -2,6 +2,7 @@ import os
 import requests
 from typing import Union, List
 from math import log2, floor, pow
+from IPython.display import display, HTML
 
 
 def format_size(size_bytes):
@@ -62,8 +63,10 @@ def download_files(filenames: Union[List[str], str], target_directory: str = "fi
         if os.path.exists(file_path):
             file_size = os.path.getsize(file_path)
             readable_size = format_size(file_size)
-            print(
-                f"File already exists: {file_path} ({readable_size}) [{idx + 1}/{total_files}]"
+            display(
+                HTML(
+                    f"""File from <a href="{url}">url</a> already exists: {file_path} ({readable_size}) [{idx + 1}/{total_files}]"""
+                )
             )
         else:
             try:
@@ -75,8 +78,10 @@ def download_files(filenames: Union[List[str], str], target_directory: str = "fi
                 # Print the location and size of the downloaded file
                 file_size = os.path.getsize(file_path)
                 readable_size = format_size(file_size)
-                print(
-                    f"Downloaded {file_path} ({readable_size}) [{idx + 1}/{total_files}]"
+                display(
+                    HTML(
+                        f"""Downloaded {file_path} from <a href="{url}">url</a> ({readable_size}) [{idx + 1}/{total_files}]"""
+                    )
                 )
 
             except requests.exceptions.RequestException as e:
