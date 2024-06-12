@@ -20,6 +20,7 @@
 
 ## Rheology
 1. [Crossover Point Determination](rheology_crossover.ipynb)
+2. [Non-Newtonian Flow](rheology_mayo.ipynb)
 
 ## Dynamic Mechanical Analysis (DMA)
 1. [Glass Transition Quantification](dma_tg.ipynb)
