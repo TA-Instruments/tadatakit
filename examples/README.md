@@ -26,3 +26,4 @@
 1. [Glass Transition Quantification](dma_tg.ipynb)
 
 ## Thermomechanical Analysis (TMA)
+1. [Thermal Expansion Coefficient Determination](tma_cte.ipynb)
