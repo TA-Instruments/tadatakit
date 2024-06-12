@@ -16,5 +16,12 @@
 ## Simultaneous DSC/TGA (SDT)
 1. [Auto-Analysis of SDT Data](sdt_enthalpy.ipynb)
 
+## Sorption Analysis (SA)
+
 ## Rheology
 1. [Crossover Point Determination](rheology_crossover.ipynb)
+
+## Dynamic Mechanical Analysis (DMA)
+1. [Glass Transition Quantification](dma_tg.ipynb)
+
+## Thermomechanical Analysis (TMA)
