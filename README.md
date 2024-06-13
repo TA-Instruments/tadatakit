@@ -8,7 +8,17 @@ If you would like to jump to some usage examples head over to our [collection of
 
 ## Installation
 
-...
+### Prerequisites
+
+Before installing `tadatakit`, ensure that you have Python 3.9 or later installed on your system. You can download Python from the official [Python website](https://www.python.org/downloads/).
+
+### Installing via Pip
+
+Open your terminal or command prompt and run the following command:
+
+```bash
+pip install tadatakit
+```
 
 ## Features
 
@@ -16,7 +26,7 @@ The `tadatakit` library offers a robust suite of features designed to simplify a
 
 - **Dynamic Class Generation:** Automatically generates Python classes from the JSON schema. This feature ensures that the data models are always in sync with the latest schema definitions, reducing maintenance overhead and potential for human error.
 
-- **Pandas Integration:** Seamlessly converts data into pandas DataFrames, making it easier to perform complex data analysis, visualization, and manipulation directly from experiment results.
+- **Pandas Integration:** Seamlessly converts data into [pandas](https://pandas.pydata.org/) DataFrames, making it easier to perform complex data analysis, visualization, and manipulation directly from experiment results.
 
 - **Extensible Architecture:** Designed with flexibility in mind, allowing users to easily extend or customize the generated classes to suit specific needs. Whether adding new methods, integrating with other libraries, or modifying property behaviors, `tadatakit` supports it all.
 

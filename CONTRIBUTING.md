@@ -36,7 +36,7 @@ Before you begin, you'll need to have the following installed:
 To ensure code quality and consistency, we use pre-commit hooks. These hooks automatically check for issues like code formatting, linting errors, and more before you commit.
 
 ### Installing Pre-commit Hooks
-* After setting up the project, install the pre-commit hooks by running:
+After setting up the project, install the pre-commit hooks by running:
 ```bash
 poetry run pre-commit install
 ```
