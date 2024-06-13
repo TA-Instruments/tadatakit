@@ -1,6 +1,6 @@
-# TA Data Kit (tadatakit)
+# TA&trade; Data Kit (tadatakit)
 
-TA Data Kit is a Python library developed by [TA Instruments](https://www.tainstruments.com/), designed for easy parsing and handling of data exported by [TRIOS :tm: JSON Export](https://www.tainstruments.com/).
+TA Data Kit is a Python library developed by [TA Instruments&trade;](https://www.tainstruments.com/), designed for easy parsing and handling of data exported by [TRIOS&trade; JSON Export Feature](https://www.tainstruments.com/).
 
 ## Examples
 
@@ -12,7 +12,7 @@ If you would like to jump to some usage examples head over to our [collection of
 
 ## Features
 
-The `tadatakit` library offers a robust suite of features designed to simplify and enhance the way you handle data from TRIOS :tm: JSON Export.
+The `tadatakit` library offers a robust suite of features designed to simplify and enhance the way you handle data from TRIOS JSON Export Feature.
 
 - **Dynamic Class Generation:** Automatically generates Python classes from the JSON schema. This feature ensures that the data models are always in sync with the latest schema definitions, reducing maintenance overhead and potential for human error.
 
@@ -130,7 +130,7 @@ print(experiment.time_since_experiment())
 
 ## Explanation Of Approach
 
-The `tadatakit.class_generator` module within the TA Data Kit automates the creation of Python classes directly from the TA Instruments TRIOS :tm: JSON Export Schema. This process allows for dynamic and efficient handling of data that conforms to defined standards, enhancing both development speed and data integrity. Here’s how the library achieves this:
+The `tadatakit.class_generator` module within the TA Data Kit automates the creation of Python classes directly from the TA Instruments TRIOS JSON Export Schema. This process allows for dynamic and efficient handling of data that conforms to defined standards, enhancing both development speed and data integrity. Here’s how the library achieves this:
 
 ### Overview
 The library converts a JSON schema provided in a specification file into fully functional Python classes. These classes include type hints, serialization methods, and custom behaviors, closely mirroring the structure and requirements laid out in the schema.
@@ -162,3 +162,7 @@ Generated classes are registered in a global class registry within the library. 
 We welcome contributions from the community and are pleased to have you join us in improving `tadatakit`. Whether you are fixing bugs, adding new features, improving documentation, or suggesting new functionality, your input is valuable!
 
 If you are interested in contributing to the `tadatakit` library, please read our [contributing guidelines](CONTRIBUTING.md) for detailed information on how to get started, coding conventions, and the pull request process.
+
+## Notes
+
+TA Instruments, TA, and TRIOS are trademarks of Waters Technologies Corporation.
