@@ -17,6 +17,7 @@
 1. [Auto-Analysis of SDT Data](sdt_enthalpy.ipynb)
 
 ## Sorption Analysis (SA)
+1. [Hygroscopicity and Surface Area Quantification](sa_wood.ipynb)
 
 ## Rheology
 1. [Crossover Point Determination](rheology_crossover.ipynb)
