@@ -1,4 +1,4 @@
-# TA&trade; Data Kit (tadatakit)
+# TA Data Kit (tadatakit)
 
 TA Data Kit is a Python library developed by [TA Instruments&trade;](https://www.tainstruments.com/), designed for easy parsing and handling of data exported by [TRIOS&trade; JSON Export Feature](https://www.tainstruments.com/).
 
