@@ -1,6 +1,6 @@
 # TA Data Kit (tadatakit)
 
-TA Data Kit is a Python library developed by [TA Instruments&trade;](https://www.tainstruments.com/), designed for easy parsing and handling of data exported by [TRIOS&trade; JSON Export Feature](https://www.tainstruments.com/).
+TA Data Kit is a Python library developed by [TA Instruments&trade;](https://www.tainstruments.com/), designed for easy parsing and handling of data exported by [TRIOS&trade; JSON Export Feature](https://www.tainstruments.com/trios-software/#data).
 
 ## Examples
 
@@ -24,7 +24,7 @@ pip install tadatakit
 
 The `tadatakit` library offers a robust suite of features designed to simplify and enhance the way you handle data from TRIOS JSON Export Feature.
 
-- **Dynamic Class Generation:** Automatically generates Python classes from the JSON schema. This feature ensures that the data models are always in sync with the latest schema definitions, reducing maintenance overhead and potential for human error.
+- **Dynamic Class Generation:** Automatically generates Python classes from the [TRIOS JSON Schema](https://software.tainstruments.com/schemas/TRIOSJSONExportSchema). This ensures that the data models are always in sync with the latest schema definitions.
 
 - **Pandas Integration:** Seamlessly converts data into [pandas](https://pandas.pydata.org/) DataFrames, making it easier to perform complex data analysis, visualization, and manipulation directly from experiment results.
 
