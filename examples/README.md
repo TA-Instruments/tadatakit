@@ -23,7 +23,7 @@ These notebooks provide step-by-step guides for various data analysis and visual
 
 2. [Multi-Experiment Kinetics](kinetics.ipynb)
 
-    This notebook demonstrates how to perform a kinetics analysis using DSC data. It includes loading and organizing data by heating rate, defining functions for data processing, visualizing DSC curves, and calculating activation energy from the Arrhenius plot of Log Heating Rate vs. 1/Peak Temperature.
+    This notebook demonstrates how to perform a kinetics analysis using the Ozawa method on DSC data. It includes loading and organizing data by heating rate, defining functions for data processing, visualizing DSC curves, and calculating activation energy from the Arrhenius plot of Log Heating Rate vs. 1/Peak Temperature.
 
 ## Thermogravimetric Analysis (TGA)
 1. [TGA Weight Loss](tga_weight_loss.ipynb)
@@ -45,9 +45,9 @@ These notebooks provide step-by-step guides for various data analysis and visual
 
     This notebook demonstrates how to identify the crossover point from rheology results. It includes loading experiment data, plotting storage and loss moduli against angular frequency, and performing linear interpolation to quantify crossover modulus and frequency.
 
-2. [Non-Newtonian Flow](rheology_mayo.ipynb)
+2. [Yield Stress Determination](rheology_mayo.ipynb)
 
-    This notebook demonstrates how to quantify the flow behavior of a non-Newtonian fluid (mayonnaise) using a fit to the Herschel-Bulkley model. It includes loading experiment data, plotting shear stress against shear rate, and implementing a gradient descent function for the Herschel-Bulkley model.
+    This notebook demonstrates how to quantify the yield stress of a non-Newtonian fluid (mayonnaise) using a fit to the Herschel-Bulkley model. It includes loading experiment data, plotting shear stress against shear rate, and implementing a gradient descent function for the Herschel-Bulkley model.
 
 ## Dynamic Mechanical Analysis (DMA)
 1. [Glass Transition Quantification](dma_tg.ipynb)
