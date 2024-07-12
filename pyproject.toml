@@ -58,5 +58,4 @@ exclude = '''
 [[tool.poetry.source]]
 name = "pypi-test"
 url = "https://test.pypi.org/simple/"
-default = false
-secondary = true
+priority = "explicit"
