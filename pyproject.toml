@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tadatakit"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python library for parsing and handling data exported by TA Instruments' TRIOS JSON Export"
 authors = ["Stuart Cook <stuart_cook@waters.com>"]
 readme = "README.md"
