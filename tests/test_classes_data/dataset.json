@@ -1,0 +1,717 @@
+{
+  "Schema": {
+    "Url": "https://software.tainstruments.com/schemas/TRIOSJSONExportSchema"
+  },
+  "Operators": [
+    {
+      "Name": "AG"
+    }
+  ],
+  "Sample": {
+    "Name": "ARES-G2 - Strain Sweep on PDMS",
+    "Notes": " Wc = 5.964 r/s\r\n Gc = 2.6109e4 PA\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+    "Density": {
+      "Value": 1000.0,
+      "Unit": {
+        "Name": "g/cm\u00b3"
+      }
+    }
+  },
+  "Procedure": {
+    "Name": "Strain Sweep - PDMS",
+    "Steps": [
+      {
+        "Name": "End Of Test-Instrument : \nEnvironmental Control: On Temperature Control Inherit Temperature\nFCO Gas Source No change\nMaintain LN2 fill Enabled: Off \nAxial Force Adjustment: Off Transducer / Motor: On Transducer Range High range\nNormal Transducer Mode  Maintain\nMotor lock Unlocked\n\n",
+        "Id": "9d187e34-7e03-49bc-b609-70e5fcacf8d7"
+      },
+      {
+        "Name": "Conditioning-Transducer : \nTransducer Mode Switching: Off Motor State / Equilibration Delay : Off Transducer Zeroing / Range Switching: On Range  Override\nRange selection Med range\nAuto range: Off \nTransducer zero time Standard\nZero torque: On \nZero normal force: On\n\n",
+        "Id": "f50e9903-f15c-4b22-b07c-969e1beac21f"
+      },
+      {
+        "Name": "Oscillation-Amplitude : \nTemperature 30 \u00b0C Inherit Set Point: Off \nSoak Time 120.0 s Wait For Temperature: Off \nAngular frequency 6.283rad/s\nLogarithmic sweep\nStrain % 3.0e-3 to 3%\nPoints per decade 10  \nAcquisition Mode:  Correlation is selected\nDelay cycles 1  \nDelay time 1.0 s \nFrequency based correlation: On Save waveform (point display): On Save image: Off Iterative Strain Adjustment: Off Use additional harmonics: Off Superimpose steady shear rate: Off Maintain Axial Force during acquisition: Off Enabled: Off Enabled: Off Enabled: Off\n\n",
+        "Id": "a884ec21-e73a-4d35-8a49-ae98e5104d8f"
+      }
+    ],
+    "Configuration": {
+      "InstrumentConfigurations": [
+        {
+          "Type": "AresG2",
+          "SerialNumber": "4010-0859",
+          "Name": "4010-0859",
+          "Location": "Apps Lab",
+          "GapZeroSetback": {
+            "Value": 1.0,
+            "Unit": {
+              "Name": "mm"
+            }
+          },
+          "TemperatureLimit": {
+            "Value": 620.0,
+            "Unit": {
+              "Name": "\u00b0C"
+            }
+          },
+          "TempOffsetTbl01": "FCO/Upper Tool PRT offset ",
+          "TempOffsetTbl02": "FCO/Lower Tool PRT offset ",
+          "TempOffsetTbl03": "FCO/Middle PRT offset ",
+          "TemperatureOption": "FCO/Air",
+          "Versions": {
+            "CodeImageLoader": "V2018.2.13",
+            "MainEmbeddedKernel": "V2019.10.10",
+            "PowerBoard": "V2017.1.11",
+            "LinearEncoderBoard": "V2017.1.11",
+            "StepperRearPanelBoard": "V2022.1.7",
+            "MotorPRTBoard": "V2012.6.25",
+            "TransducerPRTBoard": "V2012.6.25",
+            "PhaseFireBoard": "V2020.10.6",
+            "FCOPRTBoard": "V2011.9.7"
+          },
+          "Geometry": {
+            "Name": "25.0mm parallel plate,  Stainless steel",
+            "Diameter": {
+              "Value": 25.0,
+              "Unit": {
+                "Name": "mm"
+              }
+            },
+            "Gap": {
+              "Value": 1.0,
+              "Unit": {
+                "Name": "mm"
+              }
+            },
+            "LoadingGap": {
+              "Value": 10.0,
+              "Unit": {
+                "Name": "mm"
+              }
+            },
+            "TrimGapOffset": {
+              "Value": 0.05,
+              "Unit": {
+                "Name": "mm"
+              }
+            },
+            "UpperParallelPlateMaterial": "Stainless steel",
+            "ExpansionCoefficient": {
+              "Value": 0.0,
+              "Unit": {
+                "Name": "\u00b5m/\u00b0C"
+              }
+            },
+            "MoveStage": "Passive",
+            "UpperCompliance": {
+              "Value": 0.705,
+              "Unit": {
+                "Name": "mrad/N.m"
+              }
+            },
+            "LowerCompliance": {
+              "Value": 0.705,
+              "Unit": {
+                "Name": "mrad/N.m"
+              }
+            },
+            "Inertia": {
+              "Value": 3.87,
+              "Unit": {
+                "Name": "\u00b5N.m.s\u00b2"
+              }
+            },
+            "UpperMass": {
+              "Value": 0.0,
+              "Unit": {
+                "Name": "g"
+              }
+            },
+            "FrictionEnabled": {
+              "Value": 1.065
+            },
+            "StressConstant": {
+              "Value": 325949.32326399989,
+              "Unit": {
+                "Name": "Pa/N.m"
+              }
+            },
+            "StrainConstant": {
+              "Value": 12.5,
+              "Unit": {
+                "Name": "1/rad"
+              }
+            },
+            "LinearStressConstant": {
+              "Value": 2037.1832715762603,
+              "Unit": {
+                "Name": "Pa/N"
+              }
+            },
+            "LinearStrainConstant": {
+              "Value": 1000.0,
+              "Unit": {
+                "Name": "1/m"
+              }
+            },
+            "NormalStressConstant": {
+              "Value": 4074.3665431525205,
+              "Unit": {
+                "Name": "Pa/N"
+              }
+            }
+          },
+          "Calibrations": [
+            {
+              "MotorCommutationAngleCalibration": "2023-01-06T10:28:31.3955707Z",
+              "PhaseAngleCorrectionCalibration": "2023-01-06T15:02:28.1102775Z",
+              "EncoderMappingCalibration": "2023-01-06T12:59:14.713707Z",
+              "EncoderImpairmentsCalibration": "2023-01-06T12:44:27.4836912Z",
+              "MotorResidualTorqueCalibration": "2020-08-18T09:17:20.5603348Z",
+              "TransducerStaticNormalCalibration": "2023-01-06T10:00:58.927197Z",
+              "TransducerStaticTorqueCalibration": "2023-01-06T09:49:28.1570208Z",
+              "FilterLagCorrectionCalibration": "2023-01-06T11:24:45.3911256Z",
+              "TransducerComplianceScalingCalibration": "2023-01-06T14:19:34.3967028Z",
+              "MotorTorque_MotorForceConstantCalibration": "2023-01-06T14:32:53.7896438Z",
+              "ProgrammableGainAmplifierCalibration": "2023-01-06T11:03:51.7005504Z",
+              "OSPInertiaDampingFactorCalibration": "2023-01-06T12:19:23.2681294Z",
+              "OSPForceVersusPositionCorrectionCalibration": "2023-01-06T12:05:52.1848633Z",
+              "OSPPhaseAngleCorrectionCalibration": "2023-01-06T16:16:22.6999745Z",
+              "SPFrtScaleLow": {
+                "Value": 52.22486
+              },
+              "SPFrtScaleMid": {
+                "Value": 208.8995
+              },
+              "TransducerFullScale": {
+                "Value": 2088.9951171875
+              },
+              "SPNrmScale": {
+                "Value": 2100.306
+              },
+              "SPXducerMass": {
+                "Value": 567.8567
+              },
+              "SPXducerNormDamping": {
+                "Value": -0.9398437
+              },
+              "SPXducerNormSpringConst": {
+                "Value": 0.2516335
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "Analyses": [],
+  "Results": {
+    "Processed": {
+      "Classification": {
+        "Id": "Latest",
+        "Description": "Data may include user edits from transformation, visualization, and analysis"
+      },
+      "ResultsSteps": [
+        {
+          "Id": "a8b61200-ae3f-40a9-831e-880f413896ee",
+          "Name": "Amplitude - 1"
+        }
+      ],
+      "ColumnHeaders": {
+        "Raw phase (normal force)_\u00b0": {
+          "DisplayName": "Raw phase (normal force)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b0"
+          }
+        },
+        "Oscillation displacement_rad": {
+          "DisplayName": "Oscillation displacement",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "rad"
+          }
+        },
+        "Oscillation torque_\u00b5N.m": {
+          "DisplayName": "Oscillation torque",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b5N.m"
+          }
+        },
+        "G*/sin(delta)_kPa": {
+          "DisplayName": "G*/sin(delta)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "kPa"
+          }
+        },
+        "Loss compliance_1/MPa": {
+          "DisplayName": "Loss compliance",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/MPa"
+          }
+        },
+        "Gap_mm": {
+          "DisplayName": "Gap",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "mm"
+          }
+        },
+        "ScaleTorqWaveData": {
+          "DisplayName": "ScaleTorqWaveData",
+          "ValueType": "Number"
+        },
+        "Shear rate_1/s": {
+          "DisplayName": "Shear rate",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/s"
+          }
+        },
+        "Complex compliance_1/MPa": {
+          "DisplayName": "Complex compliance",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/MPa"
+          }
+        },
+        "Angular frequency_rad/s": {
+          "DisplayName": "Angular frequency",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "rad/s"
+          }
+        },
+        "X-ducer stiffness_N.m/rad": {
+          "DisplayName": "X-ducer stiffness",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "N.m/rad"
+          }
+        },
+        "Oscillation strain rate_1/s": {
+          "DisplayName": "Oscillation strain rate",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/s"
+          }
+        },
+        "Oscillation strain (cmd)_%": {
+          "DisplayName": "Oscillation strain (cmd)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "%"
+          }
+        },
+        "Viscosity_Pa.s": {
+          "DisplayName": "Viscosity",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "Pa.s"
+          }
+        },
+        "Oscillation strain_%": {
+          "DisplayName": "Oscillation strain",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "%"
+          }
+        },
+        "Loss modulus_MPa": {
+          "DisplayName": "Loss modulus",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "Stress_MPa": {
+          "DisplayName": "Stress",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "Torque (step)_\u00b5N.m": {
+          "DisplayName": "Torque (step)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b5N.m"
+          }
+        },
+        "Delta length_mm": {
+          "DisplayName": "Delta length",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "mm"
+          }
+        },
+        "Stress (step)_MPa": {
+          "DisplayName": "Stress (step)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "Run time_s": {
+          "DisplayName": "Run time",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "s"
+          }
+        },
+        "Stiffness_N.m/rad": {
+          "DisplayName": "Stiffness",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "N.m/rad"
+          }
+        },
+        "Status bits 2": {
+          "DisplayName": "Status bits 2",
+          "ValueType": "Text"
+        },
+        "Results Step Id": {
+          "DisplayName": "Results Step Id",
+          "ValueType": "Uuid"
+        },
+        "Torque transducer": {
+          "DisplayName": "Torque transducer",
+          "ValueType": "Text"
+        },
+        "Raw Phase (Xducer displacement)_\u00b0": {
+          "DisplayName": "Raw Phase (Xducer displacement)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b0"
+          }
+        },
+        "Storage compliance_1/MPa": {
+          "DisplayName": "Storage compliance",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/MPa"
+          }
+        },
+        "Oscillation normal force average_N": {
+          "DisplayName": "Oscillation normal force average",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "N"
+          }
+        },
+        "Tan(delta)": {
+          "DisplayName": "Tan(delta)",
+          "ValueType": "Number"
+        },
+        "Step time_s": {
+          "DisplayName": "Step time",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "s"
+          }
+        },
+        "Normal transducer": {
+          "DisplayName": "Normal transducer",
+          "ValueType": "Text"
+        },
+        "G*.sin(delta)_kPa": {
+          "DisplayName": "G*.sin(delta)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "kPa"
+          }
+        },
+        "Date and time": {
+          "DisplayName": "Date and time",
+          "ValueType": "DateTime"
+        },
+        "Out of phase component of \u03b7*_Pa.s": {
+          "DisplayName": "Out of phase component of \u03b7*",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "Pa.s"
+          }
+        },
+        "Raw phase (torque)_\u00b0": {
+          "DisplayName": "Raw phase (torque)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b0"
+          }
+        },
+        "Time_s": {
+          "DisplayName": "Time",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "s"
+          }
+        },
+        "Storage modulus_MPa": {
+          "DisplayName": "Storage modulus",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "1/temperature_1/K": {
+          "DisplayName": "1/temperature",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/K"
+          }
+        },
+        "Transducer range": {
+          "DisplayName": "Transducer range",
+          "ValueType": "Integer"
+        },
+        "Status bits": {
+          "DisplayName": "Status bits",
+          "ValueType": "Text"
+        },
+        "Axial force_N": {
+          "DisplayName": "Axial force",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "N"
+          }
+        },
+        "Velocity_rad/s": {
+          "DisplayName": "Velocity",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "rad/s"
+          }
+        },
+        "Oscillation normal stress_MPa": {
+          "DisplayName": "Oscillation normal stress",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "Complex modulus_MPa": {
+          "DisplayName": "Complex modulus",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "Dynamic viscosity_Pa.s": {
+          "DisplayName": "Dynamic viscosity",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "Pa.s"
+          }
+        },
+        "Phase angle_\u00b0": {
+          "DisplayName": "Phase angle",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b0"
+          }
+        },
+        "Oscillation normal force_N": {
+          "DisplayName": "Oscillation normal force",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "N"
+          }
+        },
+        "ScaleNormWaveData": {
+          "DisplayName": "ScaleNormWaveData",
+          "ValueType": "Number"
+        },
+        "X-ducer Displacement_rad": {
+          "DisplayName": "X-ducer Displacement",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "rad"
+          }
+        },
+        "Oscillation stress_MPa": {
+          "DisplayName": "Oscillation stress",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "MPa"
+          }
+        },
+        "Strain ratio": {
+          "DisplayName": "Strain ratio",
+          "ValueType": "Number"
+        },
+        "ScaleStrnWaveData_rad": {
+          "DisplayName": "ScaleStrnWaveData",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "rad"
+          }
+        },
+        "Torque_\u00b5N.m": {
+          "DisplayName": "Torque",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b5N.m"
+          }
+        },
+        "Strain constant_1/rad": {
+          "DisplayName": "Strain constant",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "1/rad"
+          }
+        },
+        "Temperature_\u00b0C": {
+          "DisplayName": "Temperature",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "\u00b0C"
+          }
+        },
+        "Frequency_Hz": {
+          "DisplayName": "Frequency",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "Hz"
+          }
+        },
+        "Oscillation displacement (cmd)_rad": {
+          "DisplayName": "Oscillation displacement (cmd)",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "rad"
+          }
+        },
+        "Complex viscosity_Pa.s": {
+          "DisplayName": "Complex viscosity",
+          "ValueType": "Number",
+          "Unit": {
+            "Name": "Pa.s"
+          }
+        }
+      },
+      "Rows": [
+        {
+          "Stress (step)_MPa": 9.90844424813986E-09,
+          "Axial force_N": 0.00977746490389109,
+          "Shear rate_1/s": 0,
+          "Raw Phase (Xducer displacement)_\u00b0": 151.625022290892,
+          "Status bits": "0x120B6457",
+          "Stress_MPa": 9.90844424813986E-09,
+          "Complex viscosity_Pa.s": 6042.52978515625,
+          "Dynamic viscosity_Pa.s": 4234.4404296875,
+          "Angular frequency_rad/s": 6.28299999237061,
+          "Torque (step)_\u00b5N.m": 0.0303987270910966,
+          "Loss compliance_1/MPa": 18.4582859219518,
+          "Complex modulus_MPa": 0.03796521484375,
+          "Raw phase (normal force)_\u00b0": 0,
+          "Oscillation normal force_N": 0,
+          "Strain constant_1/rad": 12.5095701217651,
+          "ScaleTorqWaveData": 0.0370468981564045,
+          "Oscillation stress_MPa": 1.13517642021179E-06,
+          "Storage compliance_1/MPa": 18.7904788617743,
+          "Torque_\u00b5N.m": 0.0303987270910966,
+          "Step time_s": 8.04050540924072,
+          "ScaleStrnWaveData_rad": 2.39290852732665E-06,
+          "1/temperature_1/K": 0.00329872430302203,
+          "Oscillation normal stress_MPa": 0,
+          "Loss modulus_MPa": 0.026604990234375,
+          "Gap_mm": 0.999234966002405,
+          "Oscillation strain_%": 0.00299004350381438,
+          "Oscillation displacement (cmd)_rad": 2.39818336922326E-06,
+          "Delta length_mm": -6.6183531544084E-05,
+          "Storage modulus_MPa": 0.027083798828125,
+          "ScaleNormWaveData": 0.00935185141861439,
+          "Run time_s": 150.587005615234,
+          "Transducer range": 1,
+          "Strain ratio": 0.996673107147217,
+          "Oscillation strain (cmd)_%": 0.00300002429867163,
+          "Frequency_Hz": 0.999970495700836,
+          "Results Step Id": "a8b61200-ae3f-40a9-831e-880f413896ee",
+          "X-ducer stiffness_N.m/rad": 558.313903808594,
+          "Stiffness_N.m/rad": 1.45706248283386,
+          "G*/sin(delta)_kPa": 54.1762109375,
+          "Raw phase (torque)_\u00b0": 34.1069082053901,
+          "G*.sin(delta)_kPa": 26.604990234375,
+          "Tan(delta)": 0.982321262359619,
+          "Temperature_\u00b0C": 29.9974994659424,
+          "Status bits 2": "0x100",
+          "Oscillation strain rate_1/s": 0.000187864439794794,
+          "Oscillation torque_\u00b5N.m": 3.4826778119168,
+          "X-ducer Displacement_rad": 6.23784890407819E-09,
+          "Phase angle_\u00b0": 44.489038215525,
+          "Date and time": "2023-01-09T09:27:17.5194584Z",
+          "Time_s": 8.04050540924072,
+          "Complex compliance_1/MPa": 26.3399015238974,
+          "Normal transducer": "Spring",
+          "Out of phase component of \u03b7*_Pa.s": 4310.6474609375,
+          "Velocity_rad/s": 0,
+          "Torque transducer": "FRT",
+          "Oscillation normal force average_N": -3.16566802212037E-05,
+          "Oscillation displacement_rad": 2.39020482695196E-06
+        },
+        {
+          "Stress (step)_MPa": 4.87018516287208E-09,
+          "Axial force_N": 0.00991324614733458,
+          "Shear rate_1/s": 0,
+          "Raw Phase (Xducer displacement)_\u00b0": 129.329508990786,
+          "Status bits": "0x120B6457",
+          "Stress_MPa": 4.87018516287208E-09,
+          "Complex viscosity_Pa.s": 5906.1455078125,
+          "Dynamic viscosity_Pa.s": 4094.87060546875,
+          "Angular frequency_rad/s": 6.28299999237061,
+          "Torque (step)_\u00b5N.m": 0.0149415413375209,
+          "Loss compliance_1/MPa": 18.6837842193199,
+          "Complex modulus_MPa": 0.0371083125,
+          "Raw phase (normal force)_\u00b0": 0,
+          "Oscillation normal force_N": 0,
+          "Strain constant_1/rad": 12.5094261169434,
+          "ScaleTorqWaveData": 0.0458457320928574,
+          "Oscillation stress_MPa": 1.39585542678833E-06,
+          "Storage compliance_1/MPa": 19.4195381482132,
+          "Torque_\u00b5N.m": 0.0149415413375209,
+          "Step time_s": 17.1390018463135,
+          "ScaleStrnWaveData_rad": 3.01293789561896E-06,
+          "1/temperature_1/K": 0.00329874060116708,
+          "Oscillation normal stress_MPa": 0,
+          "Loss modulus_MPa": 0.025728072265625,
+          "Gap_mm": 0.999246491119266,
+          "Oscillation strain_%": 0.0037615707697114,
+          "Oscillation displacement (cmd)_rad": 3.01910245070758E-06,
+          "Delta length_mm": -5.46200524809137E-05,
+          "Storage modulus_MPa": 0.026741224609375,
+          "ScaleNormWaveData": 0.0124396001920104,
+          "Run time_s": 159.685501098633,
+          "Transducer range": 1,
+          "Strain ratio": 0.995987772941589,
+          "Oscillation strain (cmd)_%": 0.00377672404283658,
+          "Frequency_Hz": 0.999970495700836,
+          "Results Step Id": "a8b61200-ae3f-40a9-831e-880f413896ee",
+          "X-ducer stiffness_N.m/rad": 609.295043945313,
+          "Stiffness_N.m/rad": 1.42415904998779,
+          "G*/sin(delta)_kPa": 53.52234765625,
+          "Raw phase (torque)_\u00b0": 33.4748493297863,
+          "G*.sin(delta)_kPa": 25.728072265625,
+          "Tan(delta)": 0.962112665176392,
+          "Temperature_\u00b0C": 29.996000289917,
+          "Status bits 2": "0x100",
+          "Oscillation strain rate_1/s": 0.000236339488765225,
+          "Oscillation torque_\u00b5N.m": 4.28243083661073,
+          "X-ducer Displacement_rad": 7.02850089240314E-09,
+          "Phase angle_\u00b0": 43.8937872293584,
+          "Date and time": "2023-01-09T09:27:26.6184584Z",
+          "Time_s": 17.1390018463135,
+          "Complex compliance_1/MPa": 26.9481406576233,
+          "Normal transducer": "Spring",
+          "Out of phase component of \u03b7*_Pa.s": 4256.12353515625,
+          "Velocity_rad/s": 0,
+          "Torque transducer": "FRT",
+          "Oscillation normal force average_N": 0.000104124294011854,
+          "Oscillation displacement_rad": 3.00698911814834E-06
+        }
+      ]
+    }
+  },
+  "StartTime": "2023-01-09T09:24:46.9324584Z",
+  "Log": []
+}

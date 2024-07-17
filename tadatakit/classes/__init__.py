@@ -46,11 +46,11 @@ def create_dataframe(
     column_dtypes: Dict[str, str] = {}
     column_names: Dict[str, str] = {}
 
-    for col, details in results.column_headers.to_dict().items():
-        column_dtypes[col] = "float64" if details["ValueType"] == "Number" else "object"
-        unit_dict = details.get("Unit")
-        unit_name = unit_dict["Name"] if unit_dict else None
-        column_names[col] = details["DisplayName"]
+    for col, details in results.column_headers.__dict__.items():
+        column_dtypes[col] = "float64" if details.value_type == "Number" else "object"
+        unit_dict = details.unit
+        unit_name = unit_dict.name if unit_dict else None
+        column_names[col] = details.display_name
         if unit_name is not None:
             column_names[col] += f" / {unit_name}"
 
